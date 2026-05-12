@@ -1,23 +1,51 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="ja">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>Quiz - kids-quiz-app</title>
-  <link rel="stylesheet" href="css/styles.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>小学生クイズ - 手書き完成版</title>
+    <link rel="stylesheet" href="css/quiz.css">
 </head>
 <body>
-  <header>
-    <h1>Quiz</h1>
-  </header>
-  <main>
-    <section id="quiz">
-      <h2 id="question">読み込み中…</h2>
-      <ul id="choices"></ul>
-      <div id="status"></div>
-      <button id="next">次へ</button>
-    </section>
-  </main>
-  <script src="js/app.js"></script>
+
+<div id="blackboard-frame">
+    <div id="game-container">
+        <div id="status-bar">
+            <div id="lives">❤️❤️❤️</div>
+            <div id="timer-text">10s</div>
+        </div>
+        <div id="timer-container"><div id="timer-bar"></div></div>
+
+        <div id="quiz-screen">
+            <div id="question-num"></div>
+            <div id="question-text"></div>
+            <div class="options" id="options"></div>
+        </div>
+
+        <div id="explanation-screen" class="hidden">
+            <h2 id="exp-status"></h2>
+            <div id="exp-text"></div>
+            <button class="chalk-btn" onclick="nextQuestion()">次の問題へ</button>
+        </div>
+
+        <div id="result-screen" class="hidden">
+            <h2 id="result-title">授業終了</h2>
+            <p id="result-score" style="font-size: 24px;"></p>
+            <button class="chalk-btn" onclick="location.reload()">もう一度挑戦</button>
+        </div>
+
+        <div id="feedback-overlay">
+            <svg id="svg-feedback" viewBox="0 0 200 200">
+                <circle id="draw-circle" cx="100" cy="100" r="70" />
+                <g id="draw-cross">
+                    <line x1="50" y1="50" x2="150" y2="150" />
+                    <line x1="150" y1="50" x2="50" y2="150" />
+                </g>
+            </svg>
+        </div>
+    </div>
+</div>
+
+<script src="js/quiz.js"></script>
 </body>
 </html>
