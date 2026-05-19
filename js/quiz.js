@@ -54,6 +54,10 @@ function loadQuestion() {
     
     const optionsArea = document.getElementById("options");
     optionsArea.innerHTML = "";
+    
+    // お助けボタンを一旦活性化（すべて使用済みの場合は下の判定で弾かれる）
+    document.getElementById("btn-rescue-trigger").disabled = false;
+
     data.choices.forEach((choice, i) => {
         const btn = document.createElement("button");
         btn.innerText = choice;
@@ -104,6 +108,8 @@ function useHalfItem() {
     const buttons = document.getElementById("options").getElementsByTagName("button");
     toRemove.forEach(idx => {
         buttons[idx].classList.add("incorrect-faded");
+        // 1/2で消されたボタンはクリックしても反応しないようにする
+        buttons[idx].onclick = null;
     });
 }
 
@@ -133,6 +139,14 @@ function usePassItem() {
     
     clearInterval(timerId);
 
+    // ★パスした時も連打できないようにボタンをロックする
+    const optionsArea = document.getElementById("options");
+    const buttons = optionsArea.getElementsByTagName("button");
+    for (let btn of buttons) {
+        btn.disabled = true;
+    }
+    document.getElementById("btn-rescue-trigger").disabled = true;
+
     const nextAvailableQuestion = quizData.find(q => !shuffledQuiz.includes(q));
     if (nextAvailableQuestion) {
         shuffledQuiz.push(nextAvailableQuestion);
@@ -159,6 +173,16 @@ function startTimer() {
 
 function checkAnswer(idx) {
     clearInterval(timerId);
+    
+    // ★【激ヤバ連打対策】どれか1つのボタンが押された瞬間、選択肢の全ボタンを完全ロック！
+    const optionsArea = document.getElementById("options");
+    const buttons = optionsArea.getElementsByTagName("button");
+    for (let btn of buttons) {
+        btn.disabled = true;
+    }
+    // 回答中はお助け機能ボタンも押せないようにロック
+    document.getElementById("btn-rescue-trigger").disabled = true;
+
     const isCorrect = (idx === shuffledQuiz[currentIdx].answer);
     if (isCorrect) score++;
     finishAnswer(isCorrect);
@@ -166,6 +190,14 @@ function checkAnswer(idx) {
 
 function finishAnswer(isCorrect) {
     closeRescueMenu();
+
+    // もし時間切れ（timeLeft <= 0）でここに来た場合も想定し、念のためボタンをロック
+    const optionsArea = document.getElementById("options");
+    const buttons = optionsArea.getElementsByTagName("button");
+    for (let btn of buttons) {
+        btn.disabled = true;
+    }
+    document.getElementById("btn-rescue-trigger").disabled = true;
 
     if (!isCorrect) {
         lives--;

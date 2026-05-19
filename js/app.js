@@ -69,13 +69,20 @@ function showQuestion(q) {
     const li = document.createElement('li');
     const btn = document.createElement("button");
     btn.textContent = c;
+    
     btn.addEventListener('click', () => {
+      // 【連打バグ対策】どれか1つのボタンが押された瞬間、すべての選択肢ボタンを無効化
+      const allButtons = choicesEl.querySelectorAll('button');
+      allButtons.forEach(b => b.disabled = true);
+
       if (i === q.answer) {
         statusEl.textContent = '正解！';
+        // 今後、正解数をカウントする変数を足してもここなら1回しか加算されません
       } else {
         statusEl.textContent = '不正解…';
       }
     });
+    
     li.appendChild(btn);
     choicesEl.appendChild(li);
   });
