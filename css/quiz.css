@@ -22,7 +22,7 @@ body {
     border-radius: 5px;
     padding: 20px;
     position: relative;
-    min-height: 520px;
+    min-height: 540px;
     color: #fdf5e6;
     text-align: center;
     overflow: hidden;
@@ -34,9 +34,95 @@ body {
 #timer-container { width: 100%; height: 8px; background: rgba(255,255,255,0.2); border-radius: 4px; margin-bottom: 25px; }
 #timer-bar { width: 100%; height: 100%; background: #ffd700; border-radius: 4px; transition: width 0.1s linear; }
 
-#question-text { font-size: 22px; margin-bottom: 30px; min-height: 80px; display: flex; align-items: center; justify-content: center; }
+#question-text { font-size: 22px; margin-bottom: 20px; min-height: 80px; display: flex; align-items: center; justify-content: center; flex-direction: column; }
 .options { display: grid; gap: 12px; }
 button { background: transparent; color: #fdf5e6; border: 2px solid #fdf5e6; padding: 12px; font-size: 18px; border-radius: 50px; cursor: pointer; }
+
+/* お助け機能の配置 */
+#rescue-wrapper {
+    margin-top: 25px;
+    display: flex;
+    justify-content: flex-end;
+}
+
+#btn-rescue-trigger {
+    font-size: 13px;
+    padding: 6px 14px;
+    border: 1.5px solid #ffd700;
+    color: #ffd700;
+    border-radius: 4px;
+    background: rgba(255, 215, 0, 0.1);
+}
+
+/* 画面全体ではなく黒板の内部全体に広がる選択画面 */
+#rescue-modal {
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    background: rgba(10, 35, 28, 0.95); /* 黒板より一段深い色でマスク */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 50;
+    box-sizing: border-box;
+    padding: 20px;
+}
+
+.hidden-modal {
+    display: none !important;
+}
+
+#rescue-modal-content {
+    width: 100%;
+}
+
+#rescue-modal-content h3 {
+    font-size: 20px;
+    color: #ffd700;
+    margin-top: 0;
+    margin-bottom: 20px;
+}
+
+/* お助けボタンのレイアウト */
+#rescue-options-grid {
+    display: grid;
+    gap: 12px;
+    margin-bottom: 25px;
+}
+
+.rescue-choice-btn {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 10px;
+    border-radius: 10px;
+    border: 2px solid #fdf5e6;
+    background: rgba(255, 255, 255, 0.03);
+}
+
+.rescue-choice-btn strong {
+    font-size: 18px;
+    margin-bottom: 2px;
+}
+
+.rescue-choice-btn span {
+    font-size: 12px;
+    opacity: 0.8;
+}
+
+#btn-rescue-close {
+    font-size: 15px;
+    padding: 8px 30px;
+    border: 1px solid rgba(255,255,255,0.5);
+    opacity: 0.7;
+}
+
+button:disabled {
+    opacity: 0.25;
+    cursor: not-allowed;
+    border-style: dotted;
+}
 
 #feedback-overlay {
     position: absolute;
@@ -58,23 +144,10 @@ button { background: transparent; color: #fdf5e6; border: 2px solid #fdf5e6; pad
 #draw-circle { stroke: #ff5252; stroke-dasharray: 440; stroke-dashoffset: 440; }
 #draw-cross line { stroke: #ffffff; stroke-dasharray: 150; stroke-dashoffset: 150; }
 
-/* 描画アニメーション */
-.active-circle {
-    visibility: visible !important;
-    animation: drawLine 0.6s ease-out forwards;
-}
-
-.active-cross line {
-    visibility: visible !important;
-    animation: drawLine 0.3s ease-out forwards;
-}
-
+.active-circle { visibility: visible !important; animation: drawLine 0.6s ease-out forwards; }
+.active-cross line { visibility: visible !important; animation: drawLine 0.3s ease-out forwards; }
 .active-cross line:nth-child(2) { animation-delay: 0.3s; }
-
-/* 消去アニメーション */
-.fade-out {
-    animation: fadeOut 0.3s ease-in forwards !important;
-}
+.fade-out { animation: fadeOut 0.3s ease-in forwards !important; }
 
 @keyframes drawLine { to { stroke-dashoffset: 0; } }
 @keyframes fadeOut { from { opacity: 1; } to { opacity: 0; visibility: hidden; } }
@@ -82,3 +155,12 @@ button { background: transparent; color: #fdf5e6; border: 2px solid #fdf5e6; pad
 .hidden { display: none !important; }
 .chalk-btn { background: #ffd700; color: #1b4d3e; border: none; font-weight: bold; width: 100%; margin-top: 10px; }
 #exp-text { text-align: left; font-size: 18px; background: rgba(255,255,255,0.05); padding: 15px; border-radius: 10px; margin: 20px 0; border: 1px dashed rgba(255,255,255,0.3); }
+
+.hint-badge {
+    font-size: 14px;
+    color: #ffd700;
+    background: rgba(0, 0, 0, 0.2);
+    padding: 2px 8px;
+    border-radius: 4px;
+    margin-top: 8px;
+}
