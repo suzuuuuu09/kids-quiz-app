@@ -1,0 +1,122 @@
+[
+    {
+        "question": "「りんご」は英語で何？",
+        "choices": ["dog", "apple", "book", "car"],
+        "answer": 1,
+        "hint": "apple は「りんご」という意味です。"
+    },
+    {
+        "question": "「いぬ」は英語で何？",
+        "choices": ["cat", "bird", "dog", "fish"],
+        "answer": 2,
+        "hint": "dog は「いぬ」という意味です。"
+    },
+    {
+        "question": "「本」は英語で何？",
+        "choices": ["book", "pen", "desk", "chair"],
+        "answer": 0,
+        "hint": "book は「本」という意味です。"
+    },
+    {
+        "question": "「ねこ」は英語で何？",
+        "choices": ["rabbit", "cat", "monkey", "tiger"],
+        "answer": 1,
+        "hint": "cat は「ねこ」という意味です。"
+    },
+    {
+        "question": "「水」は英語で何？",
+        "choices": ["milk", "juice", "tea", "water"],
+        "answer": 3,
+        "hint": "water は「水」という意味です。"
+    },
+    {
+        "question": "「学校」は英語で何？",
+        "choices": ["park", "school", "hospital", "store"],
+        "answer": 1,
+        "hint": "school は「学校」という意味です。"
+    },
+    {
+        "question": "「赤」は英語で何？",
+        "choices": ["blue", "yellow", "red", "green"],
+        "answer": 2,
+        "hint": "red は「赤」という意味です。"
+    },
+    {
+        "question": "「車」は英語で何？",
+        "choices": ["train", "bike", "bus", "car"],
+        "answer": 3,
+        "hint": "car は「車」という意味です。"
+    },
+    {
+        "question": "「先生」は英語で何？",
+        "choices": ["teacher", "doctor", "farmer", "police"],
+        "answer": 0,
+        "hint": "teacher は「先生」という意味です。"
+    },
+    {
+        "question": "「太陽」は英語で何？",
+        "choices": ["moon", "star", "sun", "sky"],
+        "answer": 2,
+        "hint": "sun は「太陽」という意味です。"
+    },
+    {
+        "question": "「みかん」は英語で何？",
+        "choices": ["orange", "grape", "peach", "melon"],
+        "answer": 0,
+        "hint": "orange は「みかん・オレンジ」という意味です。"
+    },
+    {
+        "question": "「鳥」は英語で何？",
+        "choices": ["fish", "bird", "lion", "horse"],
+        "answer": 1,
+        "hint": "bird は「鳥」という意味です。"
+    },
+    {
+        "question": "「鉛筆」は英語で何？",
+        "choices": ["ruler", "eraser", "pencil", "notebook"],
+        "answer": 2,
+        "hint": "pencil は「鉛筆」という意味です。"
+    },
+    {
+        "question": "「牛乳」は英語で何？",
+        "choices": ["milk", "coffee", "soup", "soda"],
+        "answer": 0,
+        "hint": "milk は「牛乳」という意味です。"
+    },
+    {
+        "question": "「青」は英語で何？",
+        "choices": ["pink", "black", "white", "blue"],
+        "answer": 3,
+        "hint": "blue は「青」という意味です。"
+    },
+    {
+        "question": "「電車」は英語で何？",
+        "choices": ["ship", "train", "airplane", "taxi"],
+        "answer": 1,
+        "hint": "train は「電車」という意味です。"
+    },
+    {
+        "question": "「友だち」は英語で何？",
+        "choices": ["friend", "family", "student", "player"],
+        "answer": 0,
+        "hint": "friend は「友だち」という意味です。"
+    },
+    {
+        "question": "「月」は英語で何？",
+        "choices": ["cloud", "moon", "rain", "snow"],
+        "answer": 1,
+        "hint": "moon は「月」という意味です。"
+    },
+    {
+        "question": "「パン」は英語で何？",
+        "choices": ["rice", "bread", "cake", "egg"],
+        "answer": 1,
+        "hint": "bread は「パン」という意味です。"
+    },
+    {
+        "question": "「家」は英語で何？",
+        "choices": ["house", "garden", "river", "road"],
+        "answer": 0,
+        "hint": "house は「家」という意味です。"
+    }
+]
