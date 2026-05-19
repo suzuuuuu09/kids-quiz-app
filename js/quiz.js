@@ -40,7 +40,7 @@ function loadQuestion() {
     document.getElementById("explanation-screen").classList.add("hidden");
     document.getElementById("quiz-screen").classList.remove("hidden");
     
-    // 選択画面ポップアップを閉じておく
+    // お助けモーダル選択画面を閉じておく
     closeRescueMenu();
     
     const circle = document.getElementById("draw-circle");
@@ -61,7 +61,7 @@ function loadQuestion() {
         optionsArea.appendChild(btn);
     });
 
-    // 選択モーダル内の各救済ボタンの状態更新
+    // モーダル内の各救済ボタンの状態更新
     document.getElementById("btn-half").disabled = hasUsedHalf;
     document.getElementById("btn-length").disabled = hasUsedLength;
     document.getElementById("btn-pass").disabled = hasUsedPass;
@@ -83,7 +83,7 @@ function closeRescueMenu() {
     document.getElementById("rescue-modal").classList.add("hidden-modal");
 }
 
-// 救済措置：1/2にする
+// 救済措置：1/2にする（不正解を暗くして非活性化）
 function useHalfItem() {
     if (hasUsedHalf) return;
     hasUsedHalf = true;
@@ -103,7 +103,7 @@ function useHalfItem() {
 
     const buttons = document.getElementById("options").getElementsByTagName("button");
     toRemove.forEach(idx => {
-        buttons[idx].style.visibility = "hidden";
+        buttons[idx].classList.add("incorrect-faded");
     });
 }
 
@@ -124,7 +124,7 @@ function useLengthItem() {
     qTextElement.appendChild(badge);
 }
 
-// 救済措置：パス機能
+// 救済措置：パス機能（末尾に新規問題を補充し、10問回答を維持）
 function usePassItem() {
     if (hasUsedPass) return;
     hasUsedPass = true;

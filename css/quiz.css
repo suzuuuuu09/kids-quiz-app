@@ -38,28 +38,46 @@ body {
 .options { display: grid; gap: 12px; }
 button { background: transparent; color: #fdf5e6; border: 2px solid #fdf5e6; padding: 12px; font-size: 18px; border-radius: 50px; cursor: pointer; }
 
-/* お助け機能の配置 */
+/* 1/2機能でハズレになったボタンのスタイル（暗くする） */
+.incorrect-faded {
+    background: rgba(0, 0, 0, 0.6) !important;
+    color: rgba(255, 255, 255, 0.2) !important;
+    border-color: rgba(255, 255, 255, 0.1) !important;
+    pointer-events: none;
+    cursor: not-allowed;
+}
+
+/* お助け機能ボタンの配置 */
 #rescue-wrapper {
     margin-top: 25px;
     display: flex;
     justify-content: flex-end;
 }
 
+/* お助け機能を開くトリガーボタン（サイズを大きく修正） */
 #btn-rescue-trigger {
-    font-size: 13px;
-    padding: 6px 14px;
-    border: 1.5px solid #ffd700;
+    font-size: 16px;          /* 13px から 16px に拡大 */
+    font-weight: bold;        /* 文字を太字に */
+    padding: 10px 22px;       /* 上下左右の余白を広げてボタン自体を大きく */
+    border: 2px solid #ffd700; /* 線を少し太く */
     color: #ffd700;
-    border-radius: 4px;
-    background: rgba(255, 215, 0, 0.1);
+    border-radius: 8px;       /* 角の丸みを調整 */
+    background: rgba(255, 215, 0, 0.15); /* 背景の黄色をほんのり濃く */
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2); /* 少し立体感を出す */
+    transition: background 0.2s, transform 0.1s;
 }
 
-/* 画面全体ではなく黒板の内部全体に広がる選択画面 */
+/* お助けボタンを押した時の軽い沈み込み演出 */
+#btn-rescue-trigger:active:not(:disabled) {
+    transform: scale(0.96);
+}
+
+/* 黒板の内部に広がるモーダル選択画面 */
 #rescue-modal {
     position: absolute;
     top: 0; left: 0;
     width: 100%; height: 100%;
-    background: rgba(10, 35, 28, 0.95); /* 黒板より一段深い色でマスク */
+    background: rgba(10, 35, 28, 0.95);
     display: flex;
     justify-content: center;
     align-items: center;
@@ -83,7 +101,7 @@ button { background: transparent; color: #fdf5e6; border: 2px solid #fdf5e6; pad
     margin-bottom: 20px;
 }
 
-/* お助けボタンのレイアウト */
+/* モーダル内ボタンのレイアウト */
 #rescue-options-grid {
     display: grid;
     gap: 12px;
