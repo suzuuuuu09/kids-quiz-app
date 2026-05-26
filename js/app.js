@@ -1,7 +1,3 @@
-// ==========================================
-// 1. 【タイトル画面（index.html）用】の処理
-// ==========================================
-
 function toggleView(showSubjectMenu) {
     const mainMenu = document.getElementById("main-menu-view");
     const subjectMenu = document.getElementById("subject-select-view");
@@ -18,11 +14,6 @@ function toggleView(showSubjectMenu) {
 function selectMode(mode) {
     window.location.href = `quiz.html?mode=${mode}`;
 }
-
-
-// ==========================================
-// 2. 【クイズ画面（quiz.html）用】の処理
-// ==========================================
 
 function getQuizMode() {
     const urlParams = new URLSearchParams(window.location.search);
