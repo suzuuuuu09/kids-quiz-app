@@ -341,7 +341,8 @@ function checkAnswer(idx, clickedBtn) {
     
     if (isCorrect) {
         score++;
-        currentPrize = PRIZE_LIST[currentIdx];
+        const prizeIdx = Math.min(currentIdx, PRIZE_LIST.length - 1);
+        currentPrize = PRIZE_LIST[prizeIdx];
     }
     
     // 計算されたランダムな秒数後に運命の判定！
