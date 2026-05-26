@@ -30,14 +30,16 @@
 
         <div id="subject-select-view" class="menu-view hidden">
             <nav id="subject-grid">
-                <button class="subject-btn kokugo" onclick="selectMode('kokugo')">国語</button>
+                <button class="subject-btn kokugo" onclick="selectMode('japanese')">国語</button>
                 <button class="subject-btn sansu" onclick="selectMode('math')">算数</button>
-                <button class="subject-btn shakai" onclick="selectMode('shakai')">社会</button>
-                <button class="subject-btn rika" onclick="selectMode('rika')">理科</button>
-                <button class="subject-btn eigo" onclick="selectMode('eigo')">英語</button>
+                <button class="subject-btn shakai" onclick="selectMode('society')">社会</button>
+                <button class="subject-btn rika" onclick="selectMode('science')">理科</button>
+                <button class="subject-btn eigo" onclick="selectMode('english')">英語</button>
             </nav>
             
-            <button class="back-btn" onclick="toggleView(false)">もどる</button>
+            <button class="menu-btn go-subjects-btn" style="margin-top: 15px; width: 100%;" onclick="toggleView(false)">
+                <span class="btn-main">もどる</span>
+            </button>
         </div>
 
     </div>

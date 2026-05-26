@@ -7,18 +7,69 @@ let timeLeft = 10;
 let timerId;
 const TOTAL_QUESTIONS = 10;
 
+// 賞金システム用の変数
+let currentPrize = 0;       
+let isDroppedOut = false;   
+const PRIZE_LIST = [10000, 20000, 30000, 50000, 100000, 200000, 300000, 500000, 700000, 1000000];
+
 // 救済措置の使用フラグ
 let hasUsedHalf = false;
 let hasUsedLength = false;
 let hasUsedPass = false;
 
+// URLパラメータから選択されたモード（教科名）を取得
+function getQuizMode() {
+    const urlParams = new URLSearchParams(window.location.search);
+    return urlParams.get('mode') || 'math';
+}
+
+// モードに応じたJSONデータを自動で読み分ける
 async function initQuiz() {
     try {
-        const response = await fetch('data/math.json');
-        if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
+        const mode = getQuizMode();
+
+        if (mode === 'random') {
+            // 全5教科のJSONを同時にすべて読み込む（一問一問ごちゃまぜ用）
+            const paths = [
+                'data/japanese.json',
+                'data/math.json',
+                'data/science.json',
+                'data/society.json',
+                'data/english.json'
+            ];
+
+            const responses = await Promise.all(paths.map(path => fetch(path)));
+            
+            for (const res of responses) {
+                if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
+            }
+
+            const jsonLists = await Promise.all(responses.map(res => res.json()));
+            quizData = jsonLists.flat();
+
+        } else {
+            // 単品教科を選択した場合
+            let targetJson = 'data/math.json';
+            if (mode === 'kokugo' || mode === 'japanese') {
+                targetJson = 'data/japanese.json';
+            } else if (mode === 'sansu' || mode === 'math') {
+                targetJson = 'data/math.json';
+            } else if (mode === 'rika' || mode === 'science') {
+                targetJson = 'data/science.json';
+            } else if (mode === 'shakai' || mode === 'society') {
+                targetJson = 'data/society.json';
+            } else if (mode === 'eigo' || mode === 'english') {
+                targetJson = 'data/english.json';
+            } else {
+                targetJson = `data/${mode}.json`;
+            }
+
+            const response = await fetch(targetJson);
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            quizData = await response.json();
         }
-        quizData = await response.json();
         
         quizData.sort(() => Math.random() - 0.5);
         shuffledQuiz = quizData.slice(0, TOTAL_QUESTIONS);
@@ -40,7 +91,6 @@ function loadQuestion() {
     document.getElementById("explanation-screen").classList.add("hidden");
     document.getElementById("quiz-screen").classList.remove("hidden");
     
-    // お助けモーダル選択画面を閉じておく
     closeRescueMenu();
     
     const circle = document.getElementById("draw-circle");
@@ -55,7 +105,6 @@ function loadQuestion() {
     const optionsArea = document.getElementById("options");
     optionsArea.innerHTML = "";
     
-    // お助けボタンを一旦活性化（すべて使用済みの場合は下の判定で弾かれる）
     document.getElementById("btn-rescue-trigger").disabled = false;
 
     data.choices.forEach((choice, i) => {
@@ -65,7 +114,6 @@ function loadQuestion() {
         optionsArea.appendChild(btn);
     });
 
-    // モーダル内の各救済ボタンの状態更新
     document.getElementById("btn-half").disabled = hasUsedHalf;
     document.getElementById("btn-length").disabled = hasUsedLength;
     document.getElementById("btn-pass").disabled = hasUsedPass;
@@ -77,17 +125,15 @@ function loadQuestion() {
     startTimer();
 }
 
-// お助け選択画面を開く
 function openRescueMenu() {
     document.getElementById("rescue-modal").classList.remove("hidden-modal");
 }
 
-// お助け選択画面を閉じる
 function closeRescueMenu() {
     document.getElementById("rescue-modal").classList.add("hidden-modal");
 }
 
-// 救済措置：1/2にする（不正解を暗くして非活性化）
+// 1/2機能
 function useHalfItem() {
     if (hasUsedHalf) return;
     hasUsedHalf = true;
@@ -108,12 +154,11 @@ function useHalfItem() {
     const buttons = document.getElementById("options").getElementsByTagName("button");
     toRemove.forEach(idx => {
         buttons[idx].classList.add("incorrect-faded");
-        // 1/2で消されたボタンはクリックしても反応しないようにする
         buttons[idx].onclick = null;
     });
 }
 
-// 救済措置：文字数ヒント
+// 文字数ヒント機能
 function useLengthItem() {
     if (hasUsedLength) return;
     hasUsedLength = true;
@@ -130,7 +175,7 @@ function useLengthItem() {
     qTextElement.appendChild(badge);
 }
 
-// 救済措置：パス機能（末尾に新規問題を補充し、10問回答を維持）
+// パス機能
 function usePassItem() {
     if (hasUsedPass) return;
     hasUsedPass = true;
@@ -139,7 +184,6 @@ function usePassItem() {
     
     clearInterval(timerId);
 
-    // ★パスした時も連打できないようにボタンをロックする
     const optionsArea = document.getElementById("options");
     const buttons = optionsArea.getElementsByTagName("button");
     for (let btn of buttons) {
@@ -174,24 +218,26 @@ function startTimer() {
 function checkAnswer(idx) {
     clearInterval(timerId);
     
-    // ★【激ヤバ連打対策】どれか1つのボタンが押された瞬間、選択肢の全ボタンを完全ロック！
     const optionsArea = document.getElementById("options");
     const buttons = optionsArea.getElementsByTagName("button");
     for (let btn of buttons) {
         btn.disabled = true;
     }
-    // 回答中はお助け機能ボタンも押せないようにロック
     document.getElementById("btn-rescue-trigger").disabled = true;
 
     const isCorrect = (idx === shuffledQuiz[currentIdx].answer);
-    if (isCorrect) score++;
+    
+    if (isCorrect) {
+        score++;
+        currentPrize = PRIZE_LIST[currentIdx];
+    }
+    
     finishAnswer(isCorrect);
 }
 
 function finishAnswer(isCorrect) {
     closeRescueMenu();
 
-    // もし時間切れ（timeLeft <= 0）でここに来た場合も想定し、念のためボタンをロック
     const optionsArea = document.getElementById("options");
     const buttons = optionsArea.getElementsByTagName("button");
     for (let btn of buttons) {
@@ -232,6 +278,25 @@ function showExplanation(statusType) {
     }
     
     document.getElementById("exp-text").innerText = data.hint;
+    document.getElementById("current-prize").innerText = currentPrize.toLocaleString();
+
+    const dropBtn = document.getElementById("btn-drop-out");
+    if (dropBtn) {
+        if (lives <= 0) {
+            dropBtn.disabled = true;
+            dropBtn.innerText = "ゲームオーバー";
+            dropBtn.style.backgroundColor = "#7f8c8d";
+        } else {
+            dropBtn.disabled = false;
+            dropBtn.innerText = "ここでやめる";
+            dropBtn.style.backgroundColor = "#e74c3c";
+        }
+    }
+}
+
+function dropOut() {
+    isDroppedOut = true;
+    showResult();
 }
 
 function updateLivesUI() {
@@ -243,6 +308,10 @@ function nextQuestion() {
     loadQuestion();
 }
 
+function backToTitle() {
+    window.location.href = "index.html";
+}
+
 function showResult() {
     document.getElementById("quiz-screen").classList.add("hidden");
     document.getElementById("explanation-screen").classList.add("hidden");
@@ -252,9 +321,22 @@ function showResult() {
     document.getElementById("result-score").innerText = `正解数: ${score} / ${TOTAL_QUESTIONS}`;
     
     const title = document.getElementById("result-title");
-    if (lives > 0 && score === TOTAL_QUESTIONS) title.innerText = "満点！天才小学生！";
-    else if (lives > 0) title.innerText = "合格！よく頑張りました";
-    else title.innerText = "残念！やり直しです...";
+    const prizeRes = document.getElementById("result-prize");
+    
+    if (isDroppedOut) {
+        title.innerText = "賢い選択！ゲームを終了しました";
+        prizeRes.innerHTML = `お見事！獲得賞金 <span style="font-size: 32px; color: #ffd700;">${currentPrize.toLocaleString()}</span> 円をゲット！`;
+    } else if (lives > 0 && score === TOTAL_QUESTIONS) {
+        title.innerText = "満点！ミリオンセラー達成！";
+        prizeRes.innerHTML = `完全制覇！最高賞金 <span style="font-size: 32px; color: #ffd700;">${currentPrize.toLocaleString()}</span> 円を獲得！！`;
+    } else if (lives > 0) {
+        title.innerText = "合格！よく頑張りました";
+        prizeRes.innerHTML = `最終獲得賞金 <span style="font-size: 32px; color: #ffd700;">${currentPrize.toLocaleString()}</span> 円を獲得！`;
+    } else {
+        title.innerText = "残念！やり直しです...";
+        currentPrize = 0; 
+        prizeRes.innerHTML = `賞金は <span style="font-size: 32px; color: #ff4757;">0</span> 円です...`;
+    }
 }
 
 initQuiz();
