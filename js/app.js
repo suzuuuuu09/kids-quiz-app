@@ -1,32 +1,19 @@
-// ==========================================
-// 1. 【タイトル画面（index.html）用】の処理
-// ==========================================
-
-// 画面の表示・非表示を切り替える関数
 function toggleView(showSubjectMenu) {
     const mainMenu = document.getElementById("main-menu-view");
     const subjectMenu = document.getElementById("subject-select-view");
     
     if (showSubjectMenu) {
-        // 教科えらぶ画面を出す
         mainMenu.classList.add("hidden");
         subjectMenu.classList.remove("hidden");
     } else {
-        // 初めの画面に戻す
         mainMenu.classList.remove("hidden");
         subjectMenu.classList.add("hidden");
     }
 }
 
 function selectMode(mode) {
-    // 選択されたモードをURLパラメータに付与してquiz.htmlに画面遷移
     window.location.href = `quiz.html?mode=${mode}`;
 }
-
-
-// ==========================================
-// 2. 【クイズ画面（quiz.html）用】の処理
-// ==========================================
 
 function getQuizMode() {
     const urlParams = new URLSearchParams(window.location.search);
@@ -41,6 +28,12 @@ async function loadQuestions() {
     targetJson = 'data/math.json';
   } else if (mode === 'kokugo') {
     targetJson = 'data/japanese.json';
+  } else if (mode === 'shakai') {
+    targetJson = 'data/society.json';
+  } else if (mode === 'rika') {
+    targetJson = 'data/science.json';
+  } else if (mode === 'eigo') {
+    targetJson = 'data/english.json';
   } else {
     targetJson = `data/${mode}.json`;
   }
@@ -71,13 +64,11 @@ function showQuestion(q) {
     btn.textContent = c;
     
     btn.addEventListener('click', () => {
-      // 【連打バグ対策】どれか1つのボタンが押された瞬間、すべての選択肢ボタンを無効化
       const allButtons = choicesEl.querySelectorAll('button');
       allButtons.forEach(b => b.disabled = true);
 
       if (i === q.answer) {
         statusEl.textContent = '正解！';
-        // 今後、正解数をカウントする変数を足してもここなら1回しか加算されません
       } else {
         statusEl.textContent = '不正解…';
       }
@@ -87,15 +78,3 @@ function showQuestion(q) {
     choicesEl.appendChild(li);
   });
 }
-
-(async () => {
-  if (window.location.pathname.includes('quiz.html')) {
-    const qs = await loadQuestions();
-    if (qs.length) showQuestion(qs[0]);
-    
-    const nextBtn = document.getElementById('next');
-    if (nextBtn) {
-      nextBtn.addEventListener('click', () => alert('次へ（未実装）'));
-    }
-  }
-})();

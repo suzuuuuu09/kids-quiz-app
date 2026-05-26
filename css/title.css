@@ -31,7 +31,6 @@ body {
     box-sizing: border-box;
 }
 
-/* ビジュアルエリア（文字が消えた分、中央に大きく配置） */
 #title-visual-area {
     display: flex;
     flex-direction: column;
@@ -39,67 +38,47 @@ body {
     width: 100%;
     flex-grow: 1;
     justify-content: center;
-    margin-bottom: 15px;      /* ボタンエリアとの間に適度な余白を設定 */
+    margin-bottom: 15px;
 }
 
-/* 文字を消したスペースを全て使い、300pxから360pxへさらに限界突破 */
 #title-illustration {
-    width: 100%;
-    height: 360px;           /* 限界まで高さを広げて特大表示 */
-    object-fit: contain;     /* 比率はそのままで絶対に見切れない設定 */
-    border-radius: 8px;
-    border: none;
+    width: 85%;
+    max-height: 240px;
+    object-fit: contain;
+    margin-bottom: 10px;
 }
 
-/* ロゴテキストを非表示（プログラミングで完全に消去） */
 #title-logo {
-    display: none !important;
+    font-size: 28px;
+    color: #ffd700;
+    text-shadow: 2px 2px 0px #000;
+    margin: 0;
 }
 
-/* 各メニュー画面のコンテナ */
 .menu-view {
-    display: flex;
-    flex-direction: column;
-    gap: 15px;
     width: 100%;
 }
 
-/* 画面切り替え用の非表示クラス */
-.hidden {
-    display: none !important;
-}
-
-/* ボタンの基本設定 */
-button {
-    cursor: pointer;
-    font-family: inherit;
-    transition: transform 0.1s, opacity 0.2s;
-}
-
-button:active {
-    transform: scale(0.97);
-}
-
-/* メインメニュー用ボタン（ランダム / 教科をえらぶ） */
 .menu-btn {
-    width: 100%;
-    padding: 14px;
-    border-radius: 12px;
     display: flex;
     flex-direction: column;
     align-items: center;
+    justify-content: center;
+    width: 100%;
+    padding: 14px;
+    margin-bottom: 12px;
+    border-radius: 8px;
     font-weight: bold;
+    cursor: pointer;
     border: none;
 }
 
-/* ランダムは目立つ黄色 */
 .random-btn {
     background: #ffd700;
     color: #1b4d3e;
     box-shadow: 0 4px 0px #b59600;
 }
 
-/* 教科をえらぶはチョーク風の白ベース */
 .go-subjects-btn {
     background: transparent;
     color: #fdf5e6;
@@ -110,7 +89,6 @@ button:active {
 .menu-btn .btn-main { font-size: 18px; }
 .menu-btn .btn-sub { font-size: 11px; opacity: 0.8; margin-top: 3px; }
 
-/* 教科選択のグリッド（2列） */
 #subject-grid {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
@@ -118,7 +96,6 @@ button:active {
 }
 .subject-btn.eigo { grid-column: span 2; }
 
-/* 個別の教科ボタン */
 .subject-btn {
     background: transparent;
     color: #fdf5e6;
@@ -127,21 +104,13 @@ button:active {
     font-size: 16px;
     font-weight: bold;
     border-radius: 8px;
+    cursor: pointer;
 }
 
-.subject-btn.kokugo { border-color: #ff8a80; color: #ff8a80; background: rgba(255,138,128,0.05); }
-.subject-btn.sansu  { border-color: #80d8ff; color: #80d8ff; background: rgba(128,216,255,0.05); }
-.subject-btn.shakai { border-color: #ccff90; color: #ccff90; background: rgba(204,255,144,0.05); }
-.subject-btn.rika   { border-color: #b9f6ca; color: #b9f6ca; background: rgba(185,246,202,0.05); }
-.subject-btn.eigo   { border-color: #ffe57f; color: #ffe57f; background: rgba(255,229,127,0.05); }
+.subject-btn.kokugo { border-color: #ff8a80; color: #ff8a80; }
+.subject-btn.sansu  { border-color: #80d8ff; color: #80d8ff; }
+.subject-btn.shakai { border-color: #ffd180; color: #ffd180; }
+.subject-btn.rika   { border-color: #b9f6ca; color: #b9f6ca; }
+.subject-btn.eigo   { border-color: #ea80fc; color: #ea80fc; }
 
-/* もどるボタン */
-.back-btn {
-    background: transparent;
-    color: rgba(253, 245, 230, 0.7);
-    border: 1px solid rgba(253, 245, 230, 0.4);
-    padding: 8px;
-    font-size: 14px;
-    border-radius: 6px;
-    margin-top: 5px;
-}
+.hidden { display: none !important; }

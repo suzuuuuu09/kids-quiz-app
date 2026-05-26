@@ -47,13 +47,25 @@
         <div id="explanation-screen" class="hidden">
             <h2 id="exp-status"></h2>
             <div id="exp-text"></div>
-            <button class="chalk-btn" onclick="nextQuestion()">次の問題へ</button>
+            
+            <div id="prize-display-area" style="font-size: 20px; color: #ffd700; margin: 15px 0; font-weight: bold; text-align: center; background: rgba(0,0,0,0.3); padding: 8px; border-radius: 8px;">
+                現在の積立賞金: <span id="current-prize" style="font-size: 26px;">0</span> 円
+            </div>
+
+            <div style="display: flex; gap: 12px; justify-content: center; width: 100%;">
+                <button id="btn-drop-out" class="chalk-btn" style="background-color: #e74c3c; min-width: 130px;" onclick="dropOut()">ここでやめる</button>
+                <button class="chalk-btn" style="min-width: 130px;" onclick="nextQuestion()">次の問題へ</button>
+            </div>
         </div>
 
         <div id="result-screen" class="hidden">
             <h2 id="result-title">授業終了</h2>
-            <p id="result-score" style="font-size: 24px;"></p>
-            <button class="chalk-btn" onclick="location.reload()">もう一度挑戦</button>
+            <p id="result-score" style="font-size: 22px; margin-bottom: 5px;"></p>
+            <p id="result-prize" style="font-size: 24px; color: #ffd700; font-weight: bold; margin: 15px 0; line-height: 1.4;"></p>
+            
+            <div style="display: flex; justify-content: center; width: 100%; margin-top: 10px;">
+                <button class="chalk-btn" style="min-width: 160px; background-color: #34495e;" onclick="backToTitle()">タイトルへ戻る</button>
+            </div>
         </div>
 
         <div id="feedback-overlay">
