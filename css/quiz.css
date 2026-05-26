@@ -194,4 +194,4 @@ body {
     cursor: pointer;
     box-shadow: 0 4px 0px rgba(253, 245, 230, 0.2);
 }
-.chalk-btn:active { transform: translateY(2px); box-shadow: 0 2px 0px rgba(253, 245, 230, 0.2ー); }
+.chalk-btn:active { transform: translateY(2px); box-shadow: 0 2px 0px rgba(253, 245, 230, 0.2); }
