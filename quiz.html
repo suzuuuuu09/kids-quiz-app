@@ -20,6 +20,28 @@
             <div id="question-num"></div>
             <div id="question-text"></div>
             <div class="options" id="options"></div>
+            
+            <div id="rescue-wrapper">
+                <button id="btn-rescue-trigger" onclick="openRescueMenu()">お助け機能</button>
+            </div>
+
+            <div id="rescue-modal" class="hidden-modal">
+                <div id="rescue-modal-content">
+                    <h3>どのお助け機能を使う？</h3>
+                    <div id="rescue-options-grid">
+                        <button id="btn-half" class="rescue-choice-btn" onclick="useHalfItem()">
+                            <strong>1/2</strong><span>選択肢が2つに！</span>
+                        </button>
+                        <button id="btn-length" class="rescue-choice-btn" onclick="useLengthItem()">
+                            <strong>文字数</strong><span>正解の文字数がわかる</span>
+                        </button>
+                        <button id="btn-pass" class="rescue-choice-btn" onclick="usePassItem()">
+                            <strong>パス</strong><span>問題をやり直せる</span>
+                        </button>
+                    </div>
+                    <button id="btn-rescue-close" onclick="closeRescueMenu()">戻る</button>
+                </div>
+            </div>
         </div>
 
         <div id="explanation-screen" class="hidden">
