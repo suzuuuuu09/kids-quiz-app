@@ -138,7 +138,7 @@ body {
     cursor: pointer;
     text-align: left;
 }
-.rescue-choice-btn strong { font-size: 18px; color: #f1c40f; width: 70px; shrink: 0; text-align: center; border-right: 1px solid rgba(255,255,255,0.2); margin-right: 10px; padding-right: 5px;}
+.rescue-choice-btn strong { font-size: 18px; color: #f1c40f; width: 70px; flex-shrink: 0; text-align: center; border-right: 1px solid rgba(255,255,255,0.2); margin-right: 10px; padding-right: 5px;}
 .rescue-choice-btn span { font-size: 12px; color: #ecf0f1; }
 .rescue-choice-btn:disabled { opacity: 0.3; cursor: not-allowed; background: #2c3e50; border-color: #7f8c8d; }
 .rescue-choice-btn:disabled strong { color: #7f8c8d; }
