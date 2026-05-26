@@ -1,22 +1,48 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="ja">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>kids-quiz-app</title>
-  <link rel="stylesheet" href="css/styles.css">
+  <title>kids-quiz-app - タイトル</title>
+  <link rel="stylesheet" href="css/title.css">
 </head>
 <body>
-  <header>
-    <h1>kids-quiz-app</h1>
-  </header>
-  <main>
-    <nav>
-      <a href="quiz.html?mode=random">ランダム10問</a> |
-      <a href="quiz.html?mode=subject">科目別</a>
-    </nav>
-    <p>クイズを遊ぶには上のリンクをクリックしてください。</p>
-  </main>
-  <script src="js/app.js"></script>
+
+<div id="blackboard-frame">
+    <div id="game-container">
+        
+        <div id="title-visual-area">
+            <img src="dokidoki.png" id="title-illustration" alt="クイズ部イラスト">
+            <h1 id="title-logo">ドキドキ クイズ部</h1>
+        </div>
+
+        <div id="main-menu-view" class="menu-view">
+            <button class="menu-btn random-btn" onclick="selectMode('random')">
+                <span class="btn-main">ランダムに挑戦！</span>
+                <span class="btn-sub">全教科からごちゃまぜに出題</span>
+            </button>
+
+            <button class="menu-btn go-subjects-btn" onclick="toggleView(true)">
+                <span class="btn-main">教科をえらんで挑戦！</span>
+                <span class="btn-sub">国・数・社・理・英からえらぶ</span>
+            </button>
+        </div>
+
+        <div id="subject-select-view" class="menu-view hidden">
+            <nav id="subject-grid">
+                <button class="subject-btn kokugo" onclick="selectMode('kokugo')">国語</button>
+                <button class="subject-btn sansu" onclick="selectMode('math')">算数</button>
+                <button class="subject-btn shakai" onclick="selectMode('shakai')">社会</button>
+                <button class="subject-btn rika" onclick="selectMode('rika')">理科</button>
+                <button class="subject-btn eigo" onclick="selectMode('eigo')">英語</button>
+            </nav>
+            
+            <button class="back-btn" onclick="toggleView(false)">もどる</button>
+        </div>
+
+    </div>
+</div>
+
+<script src="js/app.js"></script>
 </body>
 </html>
