@@ -312,6 +312,12 @@ function startTimer() {
         document.getElementById("timer-text").innerText = Math.ceil(timeLeft) + "s";
         if (timeLeft <= 0) {
             clearInterval(timerId);
+            const optionsArea = document.getElementById("options");
+            const buttons = optionsArea.getElementsByTagName("button");
+            for (let btn of buttons) {
+                btn.disabled = true;
+            }
+            document.getElementById("btn-rescue-trigger").disabled = true;
             playSound('incorrect'); 
             finishAnswer(false);
         }
