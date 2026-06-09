@@ -5,20 +5,27 @@ let score = 0;
 let lives = 3;
 let timeLeft = 10;
 let timerId;
+let isAnswerLocked = false;
 const TOTAL_QUESTIONS = 10;
 
 // 賞金システム用の変数
 let currentPrize = 0;       
 let isDroppedOut = false;   
-const PRIZE_LIST = [10000, 20000, 30000, 50000, 100000, 200000, 300000, 500000, 700000, 1000000];
+const PRIZE_PER_ANSWER = 10000; 
+
+// 復習機能を管理するための配列
+let reviewQuestions = [];
 
 // 救済措置の使用フラグ
 let hasUsedHalf = false;
 let hasUsedLength = false;
 let hasUsedPass = false;
 
+// ==========================================
+// 効果音生成システム (Web Audio API)
+// ==========================================
 const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-let drumIntervalId = null; // ループドラム用のタイマーID
+let drumIntervalId = null; 
 
 function playSound(type) {
     if (audioCtx.state === 'suspended') {
@@ -28,7 +35,6 @@ function playSound(type) {
     const now = audioCtx.currentTime;
 
     if (type === 'click') {
-        // 解答ボタンを押した時の「ポチッ」音
         const osc = audioCtx.createOscillator();
         const gain = audioCtx.createGain();
         osc.type = 'sine';
@@ -42,43 +48,40 @@ function playSound(type) {
         osc.stop(now + 0.05);
 
     } else if (type === 'drum_start') {
-        // 焦らしタイム中の緊迫した「ドロドロドロドロ……」というドラムロール音
         if (drumIntervalId) clearInterval(drumIntervalId);
         
         drumIntervalId = setInterval(() => {
             const dNow = audioCtx.currentTime;
             const osc = audioCtx.createOscillator();
             const gain = audioCtx.createGain();
-            osc.type = 'triangle'; // 少しこもった太鼓らしい音
-            osc.frequency.setValueAtTime(75 + Math.random() * 10, dNow); // わずかに音程を揺らす
+            osc.type = 'triangle'; 
+            osc.frequency.setValueAtTime(75 + Math.random() * 10, dNow); 
             gain.gain.setValueAtTime(0.35, dNow);
             gain.gain.linearRampToValueAtTime(0, dNow + 0.08);
             osc.connect(gain);
             gain.connect(audioCtx.destination);
             osc.start(dNow);
             osc.stop(dNow + 0.08);
-        }, 60); // 高速連打
+        }, 60); 
 
     } else if (type === 'drum_stop') {
-        // 判定が出た瞬間にドラムロールをストップ
         if (drumIntervalId) {
             clearInterval(drumIntervalId);
             drumIntervalId = null;
         }
 
     } else if (type === 'correct') {
-        // 爽快な「ピンポーン！」音
         const osc1 = audioCtx.createOscillator();
         const osc2 = audioCtx.createOscillator();
         const gain = audioCtx.createGain();
         
         osc1.type = 'sine';
-        osc1.frequency.setValueAtTime(659.25, now); // ミ
-        osc1.frequency.setValueAtTime(880.00, now + 0.15); // ラ
+        osc1.frequency.setValueAtTime(659.25, now); 
+        osc1.frequency.setValueAtTime(880.00, now + 0.15); 
         
         osc2.type = 'sine';
-        osc2.frequency.setValueAtTime(1318.5, now); // 高いミ
-        osc2.frequency.setValueAtTime(1760.0, now + 0.15); // 高いラ
+        osc2.frequency.setValueAtTime(1318.5, now); 
+        osc2.frequency.setValueAtTime(1760.0, now + 0.15); 
 
         gain.gain.setValueAtTime(0.3, now);
         gain.gain.linearRampToValueAtTime(0.3, now + 0.4);
@@ -94,7 +97,6 @@ function playSound(type) {
         osc2.stop(now + 0.6);
 
     } else if (type === 'incorrect') {
-        // 重い「ブブー！」音
         const osc1 = audioCtx.createOscillator();
         const osc2 = audioCtx.createOscillator();
         const gain = audioCtx.createGain();
@@ -119,18 +121,27 @@ function playSound(type) {
     }
 }
 
-// URLパラメータから選択されたモードを取得
 function getQuizMode() {
     const urlParams = new URLSearchParams(window.location.search);
     return urlParams.get('mode') || 'math';
 }
 
-// モードに応じたJSONデータを自動で読み分ける
 async function initQuiz() {
     try {
         const mode = getQuizMode();
 
-        if (mode === 'random') {
+        if (mode === 'review') {
+            const stored = localStorage.getItem('review_questions');
+            if (stored) {
+                quizData = JSON.parse(stored);
+            }
+            if (!quizData || quizData.length === 0) {
+                alert("復習する問題がありません！");
+                window.location.href = "index.html";
+                return;
+            }
+            shuffledQuiz = [...quizData].sort(() => Math.random() - 0.5);
+        } else if (mode === 'random') {
             const paths = [
                 'data/japanese.json',
                 'data/math.json',
@@ -146,7 +157,8 @@ async function initQuiz() {
 
             const jsonLists = await Promise.all(responses.map(res => res.json()));
             quizData = jsonLists.flat();
-
+            quizData.sort(() => Math.random() - 0.5);
+            shuffledQuiz = quizData.slice(0, TOTAL_QUESTIONS);
         } else {
             let targetJson = 'data/math.json';
             if (mode === 'kokugo' || mode === 'japanese') {
@@ -168,10 +180,9 @@ async function initQuiz() {
                 throw new Error(`HTTP error! status: ${response.status}`);
             }
             quizData = await response.json();
+            quizData.sort(() => Math.random() - 0.5);
+            shuffledQuiz = quizData.slice(0, TOTAL_QUESTIONS);
         }
-        
-        quizData.sort(() => Math.random() - 0.5);
-        shuffledQuiz = quizData.slice(0, TOTAL_QUESTIONS);
         
         updateLivesUI();
         loadQuestion();
@@ -182,6 +193,7 @@ async function initQuiz() {
 }
 
 function loadQuestion() {
+    isAnswerLocked = false;
     if (currentIdx >= shuffledQuiz.length || lives <= 0) {
         showResult();
         return;
@@ -227,6 +239,8 @@ function loadQuestion() {
 }
 
 function openRescueMenu() {
+    if (isAnswerLocked) return;
+
     playSound('click');
     document.getElementById("rescue-modal").classList.remove("hidden-modal");
 }
@@ -236,7 +250,7 @@ function closeRescueMenu() {
 }
 
 function useHalfItem() {
-    if (hasUsedHalf) return;
+    if (hasUsedHalf || isAnswerLocked) return;
     hasUsedHalf = true;
     playSound('click');
     document.getElementById("btn-half").disabled = true;
@@ -261,7 +275,7 @@ function useHalfItem() {
 }
 
 function useLengthItem() {
-    if (hasUsedLength) return;
+    if (hasUsedLength || isAnswerLocked) return;
     hasUsedLength = true;
     playSound('click');
     document.getElementById("btn-length").disabled = true;
@@ -277,8 +291,17 @@ function useLengthItem() {
     qTextElement.appendChild(badge);
 }
 
+function disableQuestionControls() {
+    const optionsArea = document.getElementById("options");
+    const buttons = optionsArea.getElementsByTagName("button");
+    for (let btn of buttons) {
+        btn.disabled = true;
+    }
+    document.getElementById("btn-rescue-trigger").disabled = true;
+}
+
 function usePassItem() {
-    if (hasUsedPass) return;
+    if (hasUsedPass || isAnswerLocked) return;
     hasUsedPass = true;
     playSound('click');
     document.getElementById("btn-pass").disabled = true;
@@ -286,12 +309,15 @@ function usePassItem() {
     
     clearInterval(timerId);
 
-    const optionsArea = document.getElementById("options");
-    const buttons = optionsArea.getElementsByTagName("button");
-    for (let btn of buttons) {
-        btn.disabled = true;
+    isAnswerLocked = true;
+    disableQuestionControls();
+
+    const data = shuffledQuiz[currentIdx];
+    if (getQuizMode() !== 'review') {
+        if (!reviewQuestions.some(q => q.question === data.question)) {
+            reviewQuestions.push(data);
+        }
     }
-    document.getElementById("btn-rescue-trigger").disabled = true;
 
     const nextAvailableQuestion = quizData.find(q => !shuffledQuiz.includes(q));
     if (nextAvailableQuestion) {
@@ -312,50 +338,52 @@ function startTimer() {
         document.getElementById("timer-text").innerText = Math.ceil(timeLeft) + "s";
         if (timeLeft <= 0) {
             clearInterval(timerId);
-            const optionsArea = document.getElementById("options");
-            const buttons = optionsArea.getElementsByTagName("button");
-            for (let btn of buttons) {
-                btn.disabled = true;
-            }
-            document.getElementById("btn-rescue-trigger").disabled = true;
             playSound('incorrect'); 
+            isAnswerLocked = true;
+            disableQuestionControls();
+            
+            const data = shuffledQuiz[currentIdx];
+            if (getQuizMode() !== 'review') {
+                if (!reviewQuestions.some(q => q.question === data.question)) {
+                    reviewQuestions.push(data);
+                }
+            }
             finishAnswer(false);
         }
     }, 100);
 }
 
 function checkAnswer(idx, clickedBtn) {
+    if (isAnswerLocked || clickedBtn.disabled) return;
+
+    isAnswerLocked = true;
     clearInterval(timerId);
-    
-    const optionsArea = document.getElementById("options");
-    const buttons = optionsArea.getElementsByTagName("button");
-    for (let btn of buttons) {
-        btn.disabled = true;
-    }
-    document.getElementById("btn-rescue-trigger").disabled = true;
+    disableQuestionControls();
 
     clickedBtn.classList.add("selected-checking");
     document.getElementById("game-container").classList.add("thinking-slow");
 
-    // ★ループ形式のドラムロール音「ドロドロドロドロ…」を開始！
     playSound('drum_start');
 
-    // ★【1.5秒から5.0秒】の間でランダムなミリ秒を算出する計算式
     const randomDelay = Math.floor(Math.random() * (5000 - 1500 + 1)) + 1500;
-
-    const isCorrect = (idx === shuffledQuiz[currentIdx].answer);
+    const data = shuffledQuiz[currentIdx];
+    const isCorrect = (idx === data.answer);
     
     if (isCorrect) {
         score++;
-        const prizeIdx = Math.min(currentIdx, PRIZE_LIST.length - 1);
-        currentPrize = PRIZE_LIST[prizeIdx];
+        if (getQuizMode() !== 'review') {
+            currentPrize += PRIZE_PER_ANSWER;
+        }
+    } else {
+        if (getQuizMode() !== 'review') {
+            if (!reviewQuestions.some(q => q.question === data.question)) {
+                reviewQuestions.push(data);
+            }
+        }
     }
     
-    // 計算されたランダムな秒数後に運命の判定！
     setTimeout(() => {
-        // ★ドラムロール音をピタッと停止
         playSound('drum_stop');
-        
         clickedBtn.classList.remove("selected-checking");
         
         if (isCorrect) {
@@ -404,7 +432,23 @@ function showExplanation(statusType) {
     }
     
     document.getElementById("exp-text").innerText = data.hint;
-    document.getElementById("current-prize").innerText = currentPrize.toLocaleString();
+
+    // 「円 円」重複バグ対策
+    const prizeContainer = document.getElementById("current-prize");
+    if (prizeContainer) {
+        if (getQuizMode() === 'review') {
+            prizeContainer.innerHTML = `<span style="font-size: 14px; color: #bdc3c7;">※復習モードのため賞金なし</span>`;
+            if (prizeContainer.nextSibling && prizeContainer.nextSibling.nodeValue === ' 円') {
+                prizeContainer.nextSibling.nodeValue = ''; 
+            }
+        } else {
+            prizeContainer.innerText = currentPrize.toLocaleString();
+            const parent = prizeContainer.parentNode;
+            if (parent && parent.innerText.includes('円 円')) {
+                parent.innerHTML = `現在の積立賞金: <span id="current-prize">${currentPrize.toLocaleString()}</span> 円`;
+            }
+        }
+    }
 
     const dropBtn = document.getElementById("btn-drop-out");
     if (dropBtn) {
@@ -416,6 +460,17 @@ function showExplanation(statusType) {
             dropBtn.disabled = false;
             dropBtn.innerText = "ここでやめる";
             dropBtn.style.backgroundColor = "#e74c3c";
+        }
+    }
+
+    // ★【ボタン文字切り替えバグ修正】
+    // class属性ではなく、次の問題へ進む関数（nextQuestion）が設定されているボタンをピンポイントで取得！
+    const nextBtn = expScreen.querySelector("button[onclick='nextQuestion()']");
+    if (nextBtn) {
+        if (currentIdx + 1 >= shuffledQuiz.length || lives <= 0) {
+            nextBtn.innerText = "結果発表へ";
+        } else {
+            nextBtn.innerText = "次の問題へ";
         }
     }
 }
@@ -442,29 +497,56 @@ function backToTitle() {
 }
 
 function showResult() {
+    const isReviewMode = (getQuizMode() === 'review');
+
+    try {
+        if (!isReviewMode) {
+            localStorage.setItem('review_questions', JSON.stringify(reviewQuestions));
+        } else {
+            if (score === shuffledQuiz.length && lives > 0) {
+                localStorage.removeItem('review_questions');
+            }
+        }
+    } catch (e) {
+        console.error("復習データの書き込みに失敗しました:", e);
+    }
+
     document.getElementById("quiz-screen").classList.add("hidden");
     document.getElementById("explanation-screen").classList.add("hidden");
     const res = document.getElementById("result-screen");
     res.classList.remove("hidden");
     
-    document.getElementById("result-score").innerText = `正解数: ${score} / ${TOTAL_QUESTIONS}`;
+    document.getElementById("result-score").innerText = `正解数: ${score} / ${shuffledQuiz.length}`;
     
     const title = document.getElementById("result-title");
     const prizeRes = document.getElementById("result-prize");
     
-    if (isDroppedOut) {
-        title.innerText = "賢い選択！ゲームを終了しました";
-        prizeRes.innerHTML = `お見事！獲得賞金 <span style="font-size: 32px; color: #ffd700;">${currentPrize.toLocaleString()}</span> 円をゲット！`;
-    } else if (lives > 0 && score === TOTAL_QUESTIONS) {
-        title.innerText = "満点！ミリオンセラー達成！";
-        prizeRes.innerHTML = `完全制覇！最高賞金 <span style="font-size: 32px; color: #ffd700;">${currentPrize.toLocaleString()}</span> 円を獲得！！`;
-    } else if (lives > 0) {
-        title.innerText = "合格！よく頑張りました";
-        prizeRes.innerHTML = `最終獲得賞金 <span style="font-size: 32px; color: #ffd700;">${currentPrize.toLocaleString()}</span> 円を獲得！`;
+    if (isReviewMode) {
+        if (lives <= 0) {
+            title.innerText = "復習お疲れ様！また挑戦しよう！";
+            prizeRes.innerHTML = `<span style="color: #bbb;">苦手な問題をしっかり確認できたね！</span>`;
+        } else if (score === shuffledQuiz.length) {
+            title.innerText = "完ペキ！復習完了！";
+            prizeRes.innerHTML = `<span style="color: #2ecc71; font-weight: bold;">すべての弱点を克服したよ！すごい！</span>`;
+        } else {
+            title.innerText = "復習クリア！";
+            prizeRes.innerHTML = `<span style="color: #ffd700;">次こそは満点を目指してがんばろう！</span>`;
+        }
     } else {
-        title.innerText = "残念！やり直しです...";
-        currentPrize = 0; 
-        prizeRes.innerHTML = `ゲームオーバーにつき、賞金は <span style="font-size: 32px; color: #ff4757;">0</span> 円（没収）です...`;
+        if (isDroppedOut) {
+            title.innerText = "賢い選択！ゲームを終了しました";
+            prizeRes.innerHTML = `お見事！獲得賞金 <span style="font-size: 32px; color: #ffd700;">${currentPrize.toLocaleString()}</span> 円をゲット！`;
+        } else if (lives > 0 && score === shuffledQuiz.length) {
+            title.innerText = "パーフェクト！全問正解！";
+            prizeRes.innerHTML = `完全制覇！最高賞金 <span style="font-size: 32px; color: #ffd700;">${currentPrize.toLocaleString()}</span> 円を獲得！！`;
+        } else if (lives > 0) {
+            title.innerText = "ゲームクリア！";
+            prizeRes.innerHTML = `最終獲得賞金 <span style="font-size: 32px; color: #ffd700;">${currentPrize.toLocaleString()}</span> 円を獲得！`;
+        } else {
+            title.innerText = "残念！ゲームオーバー...";
+            currentPrize = 0; 
+            prizeRes.innerHTML = `ライフ消滅につき、賞金は <span style="font-size: 32px; color: #ff4757;">0</span> 円（没収）です...`;
+        }
     }
 }
 
