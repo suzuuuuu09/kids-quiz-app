@@ -5,6 +5,7 @@ let score = 0;
 let lives = 3;
 let timeLeft = 10;
 let timerId;
+let isAnswerLocked = false;
 const TOTAL_QUESTIONS = 10;
 
 // 賞金システム用の変数
@@ -192,6 +193,7 @@ async function initQuiz() {
 }
 
 function loadQuestion() {
+    isAnswerLocked = false;
     if (currentIdx >= shuffledQuiz.length || lives <= 0) {
         showResult();
         return;
@@ -237,6 +239,8 @@ function loadQuestion() {
 }
 
 function openRescueMenu() {
+    if (isAnswerLocked) return;
+
     playSound('click');
     document.getElementById("rescue-modal").classList.remove("hidden-modal");
 }
@@ -246,7 +250,7 @@ function closeRescueMenu() {
 }
 
 function useHalfItem() {
-    if (hasUsedHalf) return;
+    if (hasUsedHalf || isAnswerLocked) return;
     hasUsedHalf = true;
     playSound('click');
     document.getElementById("btn-half").disabled = true;
@@ -271,7 +275,7 @@ function useHalfItem() {
 }
 
 function useLengthItem() {
-    if (hasUsedLength) return;
+    if (hasUsedLength || isAnswerLocked) return;
     hasUsedLength = true;
     playSound('click');
     document.getElementById("btn-length").disabled = true;
@@ -287,8 +291,17 @@ function useLengthItem() {
     qTextElement.appendChild(badge);
 }
 
+function disableQuestionControls() {
+    const optionsArea = document.getElementById("options");
+    const buttons = optionsArea.getElementsByTagName("button");
+    for (let btn of buttons) {
+        btn.disabled = true;
+    }
+    document.getElementById("btn-rescue-trigger").disabled = true;
+}
+
 function usePassItem() {
-    if (hasUsedPass) return;
+    if (hasUsedPass || isAnswerLocked) return;
     hasUsedPass = true;
     playSound('click');
     document.getElementById("btn-pass").disabled = true;
@@ -296,12 +309,8 @@ function usePassItem() {
     
     clearInterval(timerId);
 
-    const optionsArea = document.getElementById("options");
-    const buttons = optionsArea.getElementsByTagName("button");
-    for (let btn of buttons) {
-        btn.disabled = true;
-    }
-    document.getElementById("btn-rescue-trigger").disabled = true;
+    isAnswerLocked = true;
+    disableQuestionControls();
 
     const data = shuffledQuiz[currentIdx];
     if (getQuizMode() !== 'review') {
@@ -330,6 +339,8 @@ function startTimer() {
         if (timeLeft <= 0) {
             clearInterval(timerId);
             playSound('incorrect'); 
+            isAnswerLocked = true;
+            disableQuestionControls();
             
             const data = shuffledQuiz[currentIdx];
             if (getQuizMode() !== 'review') {
@@ -343,14 +354,11 @@ function startTimer() {
 }
 
 function checkAnswer(idx, clickedBtn) {
+    if (isAnswerLocked || clickedBtn.disabled) return;
+
+    isAnswerLocked = true;
     clearInterval(timerId);
-    
-    const optionsArea = document.getElementById("options");
-    const buttons = optionsArea.getElementsByTagName("button");
-    for (let btn of buttons) {
-        btn.disabled = true;
-    }
-    document.getElementById("btn-rescue-trigger").disabled = true;
+    disableQuestionControls();
 
     clickedBtn.classList.add("selected-checking");
     document.getElementById("game-container").classList.add("thinking-slow");
