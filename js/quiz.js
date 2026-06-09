@@ -7,10 +7,13 @@ let timeLeft = 10;
 let timerId;
 const TOTAL_QUESTIONS = 10;
 
-// ★シンプル賞金システム用の変数（1問ごとに1万円加算）
+// 賞金システム用の変数
 let currentPrize = 0;       
 let isDroppedOut = false;   
-const PRIZE_PER_ANSWER = 10000; // 1問正解につき10,000円
+const PRIZE_PER_ANSWER = 10000; 
+
+// 復習機能を管理するための配列
+let reviewQuestions = [];
 
 // 救済措置の使用フラグ
 let hasUsedHalf = false;
@@ -126,7 +129,18 @@ async function initQuiz() {
     try {
         const mode = getQuizMode();
 
-        if (mode === 'random') {
+        if (mode === 'review') {
+            const stored = localStorage.getItem('review_questions');
+            if (stored) {
+                quizData = JSON.parse(stored);
+            }
+            if (!quizData || quizData.length === 0) {
+                alert("復習する問題がありません！");
+                window.location.href = "index.html";
+                return;
+            }
+            shuffledQuiz = [...quizData].sort(() => Math.random() - 0.5);
+        } else if (mode === 'random') {
             const paths = [
                 'data/japanese.json',
                 'data/math.json',
@@ -142,7 +156,8 @@ async function initQuiz() {
 
             const jsonLists = await Promise.all(responses.map(res => res.json()));
             quizData = jsonLists.flat();
-
+            quizData.sort(() => Math.random() - 0.5);
+            shuffledQuiz = quizData.slice(0, TOTAL_QUESTIONS);
         } else {
             let targetJson = 'data/math.json';
             if (mode === 'kokugo' || mode === 'japanese') {
@@ -164,10 +179,9 @@ async function initQuiz() {
                 throw new Error(`HTTP error! status: ${response.status}`);
             }
             quizData = await response.json();
+            quizData.sort(() => Math.random() - 0.5);
+            shuffledQuiz = quizData.slice(0, TOTAL_QUESTIONS);
         }
-        
-        quizData.sort(() => Math.random() - 0.5);
-        shuffledQuiz = quizData.slice(0, TOTAL_QUESTIONS);
         
         updateLivesUI();
         loadQuestion();
@@ -289,6 +303,13 @@ function usePassItem() {
     }
     document.getElementById("btn-rescue-trigger").disabled = true;
 
+    const data = shuffledQuiz[currentIdx];
+    if (getQuizMode() !== 'review') {
+        if (!reviewQuestions.some(q => q.question === data.question)) {
+            reviewQuestions.push(data);
+        }
+    }
+
     const nextAvailableQuestion = quizData.find(q => !shuffledQuiz.includes(q));
     if (nextAvailableQuestion) {
         shuffledQuiz.push(nextAvailableQuestion);
@@ -309,6 +330,13 @@ function startTimer() {
         if (timeLeft <= 0) {
             clearInterval(timerId);
             playSound('incorrect'); 
+            
+            const data = shuffledQuiz[currentIdx];
+            if (getQuizMode() !== 'review') {
+                if (!reviewQuestions.some(q => q.question === data.question)) {
+                    reviewQuestions.push(data);
+                }
+            }
             finishAnswer(false);
         }
     }, 100);
@@ -329,15 +357,21 @@ function checkAnswer(idx, clickedBtn) {
 
     playSound('drum_start');
 
-    // 1.5秒から5.0秒のランダム焦らし
     const randomDelay = Math.floor(Math.random() * (5000 - 1500 + 1)) + 1500;
-
-    const isCorrect = (idx === shuffledQuiz[currentIdx].answer);
+    const data = shuffledQuiz[currentIdx];
+    const isCorrect = (idx === data.answer);
     
     if (isCorrect) {
         score++;
-        // ★正解数を元に綺麗に1万円ずつ加算
-        currentPrize = score * PRIZE_PER_ANSWER;
+        if (getQuizMode() !== 'review') {
+            currentPrize += PRIZE_PER_ANSWER;
+        }
+    } else {
+        if (getQuizMode() !== 'review') {
+            if (!reviewQuestions.some(q => q.question === data.question)) {
+                reviewQuestions.push(data);
+            }
+        }
     }
     
     setTimeout(() => {
@@ -390,7 +424,23 @@ function showExplanation(statusType) {
     }
     
     document.getElementById("exp-text").innerText = data.hint;
-    document.getElementById("current-prize").innerText = currentPrize.toLocaleString();
+
+    // ★「 円 円」の重複バグを修正：HTML側の「円」の文字を考慮して数字だけを入れるか、メッセージに置き換える
+    const prizeContainer = document.getElementById("current-prize");
+    if (getQuizMode() === 'review') {
+        prizeContainer.innerHTML = `<span style="font-size: 14px; color: #bdc3c7;">※復習モードのため賞金なし</span>`;
+        // HTML側の外側にある「円」の文字を一時的に非表示にするか、そのままでも違和感のないようにクリア
+        if (prizeContainer.nextSibling && prizeContainer.nextSibling.nodeValue === ' 円') {
+            prizeContainer.nextSibling.nodeValue = ''; 
+        }
+    } else {
+        prizeContainer.innerText = currentPrize.toLocaleString();
+        // もしHTML側に「 円」が元々なかった場合のために、一応親のテキストも確認・調整
+        const parent = prizeContainer.parentNode;
+        if (parent && parent.innerText.includes('円 円')) {
+            parent.innerHTML = `現在の積立賞金: <span id="current-prize">${currentPrize.toLocaleString()}</span> 円`;
+        }
+    }
 
     const dropBtn = document.getElementById("btn-drop-out");
     if (dropBtn) {
@@ -428,29 +478,56 @@ function backToTitle() {
 }
 
 function showResult() {
+    const isReviewMode = (getQuizMode() === 'review');
+
+    try {
+        if (!isReviewMode) {
+            localStorage.setItem('review_questions', JSON.stringify(reviewQuestions));
+        } else {
+            if (score === shuffledQuiz.length && lives > 0) {
+                localStorage.removeItem('review_questions');
+            }
+        }
+    } catch (e) {
+        console.error("復習データの書き込みに失敗しました:", e);
+    }
+
     document.getElementById("quiz-screen").classList.add("hidden");
     document.getElementById("explanation-screen").classList.add("hidden");
     const res = document.getElementById("result-screen");
     res.classList.remove("hidden");
     
-    document.getElementById("result-score").innerText = `正解数: ${score} / ${TOTAL_QUESTIONS}`;
+    document.getElementById("result-score").innerText = `正解数: ${score} / ${shuffledQuiz.length}`;
     
     const title = document.getElementById("result-title");
     const prizeRes = document.getElementById("result-prize");
     
-    if (isDroppedOut) {
-        title.innerText = "賢い選択！ゲームを終了しました";
-        prizeRes.innerHTML = `お見事！獲得賞金 <span style="font-size: 32px; color: #ffd700;">${currentPrize.toLocaleString()}</span> 円をゲット！`;
-    } else if (lives > 0 && score === TOTAL_QUESTIONS) {
-        title.innerText = "パーフェクト！全問正解！";
-        prizeRes.innerHTML = `完全制覇！最高賞金 <span style="font-size: 32px; color: #ffd700;">${currentPrize.toLocaleString()}</span> 円を獲得！！`;
-    } else if (lives > 0) {
-        title.innerText = "ゲームクリア！";
-        prizeRes.innerHTML = `最終獲得賞金 <span style="font-size: 32px; color: #ffd700;">${currentPrize.toLocaleString()}</span> 円を獲得！`;
+    if (isReviewMode) {
+        if (lives <= 0) {
+            title.innerText = "復習お疲れ様！また挑戦しよう！";
+            prizeRes.innerHTML = `<span style="color: #bbb;">苦手な問題をしっかり確認できたね！</span>`;
+        } else if (score === shuffledQuiz.length) {
+            title.innerText = "完ペキ！復習完了！";
+            prizeRes.innerHTML = `<span style="color: #2ecc71; font-weight: bold;">すべての弱点を克服したよ！すごい！</span>`;
+        } else {
+            title.innerText = "復習クリア！";
+            prizeRes.innerHTML = `<span style="color: #ffd700;">次こそは満点を目指してがんばろう！</span>`;
+        }
     } else {
-        title.innerText = "残念！ゲームオーバー...";
-        currentPrize = 0; 
-        prizeRes.innerHTML = `ライフ消滅につき、賞金は <span style="font-size: 32px; color: #ff4757;">0</span> 円（没収）です...`;
+        if (isDroppedOut) {
+            title.innerText = "賢い選択！ゲームを終了しました";
+            prizeRes.innerHTML = `お見事！獲得賞金 <span style="font-size: 32px; color: #ffd700;">${currentPrize.toLocaleString()}</span> 円をゲット！`;
+        } else if (lives > 0 && score === shuffledQuiz.length) {
+            title.innerText = "パーフェクト！全問正解！";
+            prizeRes.innerHTML = `完全制覇！最高賞金 <span style="font-size: 32px; color: #ffd700;">${currentPrize.toLocaleString()}</span> 円を獲得！！`;
+        } else if (lives > 0) {
+            title.innerText = "ゲームクリア！";
+            prizeRes.innerHTML = `最終獲得賞金 <span style="font-size: 32px; color: #ffd700;">${currentPrize.toLocaleString()}</span> 円を獲得！`;
+        } else {
+            title.innerText = "残念！ゲームオーバー...";
+            currentPrize = 0; 
+            prizeRes.innerHTML = `ライフ消滅につき、賞金は <span style="font-size: 32px; color: #ff4757;">0</span> 円（没収）です...`;
+        }
     }
 }
 
