@@ -425,20 +425,20 @@ function showExplanation(statusType) {
     
     document.getElementById("exp-text").innerText = data.hint;
 
-    // ★「 円 円」の重複バグを修正：HTML側の「円」の文字を考慮して数字だけを入れるか、メッセージに置き換える
+    // 「円 円」重複バグ対策
     const prizeContainer = document.getElementById("current-prize");
-    if (getQuizMode() === 'review') {
-        prizeContainer.innerHTML = `<span style="font-size: 14px; color: #bdc3c7;">※復習モードのため賞金なし</span>`;
-        // HTML側の外側にある「円」の文字を一時的に非表示にするか、そのままでも違和感のないようにクリア
-        if (prizeContainer.nextSibling && prizeContainer.nextSibling.nodeValue === ' 円') {
-            prizeContainer.nextSibling.nodeValue = ''; 
-        }
-    } else {
-        prizeContainer.innerText = currentPrize.toLocaleString();
-        // もしHTML側に「 円」が元々なかった場合のために、一応親のテキストも確認・調整
-        const parent = prizeContainer.parentNode;
-        if (parent && parent.innerText.includes('円 円')) {
-            parent.innerHTML = `現在の積立賞金: <span id="current-prize">${currentPrize.toLocaleString()}</span> 円`;
+    if (prizeContainer) {
+        if (getQuizMode() === 'review') {
+            prizeContainer.innerHTML = `<span style="font-size: 14px; color: #bdc3c7;">※復習モードのため賞金なし</span>`;
+            if (prizeContainer.nextSibling && prizeContainer.nextSibling.nodeValue === ' 円') {
+                prizeContainer.nextSibling.nodeValue = ''; 
+            }
+        } else {
+            prizeContainer.innerText = currentPrize.toLocaleString();
+            const parent = prizeContainer.parentNode;
+            if (parent && parent.innerText.includes('円 円')) {
+                parent.innerHTML = `現在の積立賞金: <span id="current-prize">${currentPrize.toLocaleString()}</span> 円`;
+            }
         }
     }
 
@@ -452,6 +452,17 @@ function showExplanation(statusType) {
             dropBtn.disabled = false;
             dropBtn.innerText = "ここでやめる";
             dropBtn.style.backgroundColor = "#e74c3c";
+        }
+    }
+
+    // ★【ボタン文字切り替えバグ修正】
+    // class属性ではなく、次の問題へ進む関数（nextQuestion）が設定されているボタンをピンポイントで取得！
+    const nextBtn = expScreen.querySelector("button[onclick='nextQuestion()']");
+    if (nextBtn) {
+        if (currentIdx + 1 >= shuffledQuiz.length || lives <= 0) {
+            nextBtn.innerText = "結果発表へ";
+        } else {
+            nextBtn.innerText = "次の問題へ";
         }
     }
 }
