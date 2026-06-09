@@ -7,18 +7,21 @@ let timeLeft = 10;
 let timerId;
 const TOTAL_QUESTIONS = 10;
 
-// 賞金システム用の変数
+// ★シンプル賞金システム用の変数（1問ごとに1万円加算）
 let currentPrize = 0;       
 let isDroppedOut = false;   
-const PRIZE_LIST = [10000, 20000, 30000, 50000, 100000, 200000, 300000, 500000, 700000, 1000000];
+const PRIZE_PER_ANSWER = 10000; // 1問正解につき10,000円
 
 // 救済措置の使用フラグ
 let hasUsedHalf = false;
 let hasUsedLength = false;
 let hasUsedPass = false;
 
+// ==========================================
+// 効果音生成システム (Web Audio API)
+// ==========================================
 const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-let drumIntervalId = null; // ループドラム用のタイマーID
+let drumIntervalId = null; 
 
 function playSound(type) {
     if (audioCtx.state === 'suspended') {
@@ -28,7 +31,6 @@ function playSound(type) {
     const now = audioCtx.currentTime;
 
     if (type === 'click') {
-        // 解答ボタンを押した時の「ポチッ」音
         const osc = audioCtx.createOscillator();
         const gain = audioCtx.createGain();
         osc.type = 'sine';
@@ -42,43 +44,40 @@ function playSound(type) {
         osc.stop(now + 0.05);
 
     } else if (type === 'drum_start') {
-        // 焦らしタイム中の緊迫した「ドロドロドロドロ……」というドラムロール音
         if (drumIntervalId) clearInterval(drumIntervalId);
         
         drumIntervalId = setInterval(() => {
             const dNow = audioCtx.currentTime;
             const osc = audioCtx.createOscillator();
             const gain = audioCtx.createGain();
-            osc.type = 'triangle'; // 少しこもった太鼓らしい音
-            osc.frequency.setValueAtTime(75 + Math.random() * 10, dNow); // わずかに音程を揺らす
+            osc.type = 'triangle'; 
+            osc.frequency.setValueAtTime(75 + Math.random() * 10, dNow); 
             gain.gain.setValueAtTime(0.35, dNow);
             gain.gain.linearRampToValueAtTime(0, dNow + 0.08);
             osc.connect(gain);
             gain.connect(audioCtx.destination);
             osc.start(dNow);
             osc.stop(dNow + 0.08);
-        }, 60); // 高速連打
+        }, 60); 
 
     } else if (type === 'drum_stop') {
-        // 判定が出た瞬間にドラムロールをストップ
         if (drumIntervalId) {
             clearInterval(drumIntervalId);
             drumIntervalId = null;
         }
 
     } else if (type === 'correct') {
-        // 爽快な「ピンポーン！」音
         const osc1 = audioCtx.createOscillator();
         const osc2 = audioCtx.createOscillator();
         const gain = audioCtx.createGain();
         
         osc1.type = 'sine';
-        osc1.frequency.setValueAtTime(659.25, now); // ミ
-        osc1.frequency.setValueAtTime(880.00, now + 0.15); // ラ
+        osc1.frequency.setValueAtTime(659.25, now); 
+        osc1.frequency.setValueAtTime(880.00, now + 0.15); 
         
         osc2.type = 'sine';
-        osc2.frequency.setValueAtTime(1318.5, now); // 高いミ
-        osc2.frequency.setValueAtTime(1760.0, now + 0.15); // 高いラ
+        osc2.frequency.setValueAtTime(1318.5, now); 
+        osc2.frequency.setValueAtTime(1760.0, now + 0.15); 
 
         gain.gain.setValueAtTime(0.3, now);
         gain.gain.linearRampToValueAtTime(0.3, now + 0.4);
@@ -94,7 +93,6 @@ function playSound(type) {
         osc2.stop(now + 0.6);
 
     } else if (type === 'incorrect') {
-        // 重い「ブブー！」音
         const osc1 = audioCtx.createOscillator();
         const osc2 = audioCtx.createOscillator();
         const gain = audioCtx.createGain();
@@ -119,13 +117,11 @@ function playSound(type) {
     }
 }
 
-// URLパラメータから選択されたモードを取得
 function getQuizMode() {
     const urlParams = new URLSearchParams(window.location.search);
     return urlParams.get('mode') || 'math';
 }
 
-// モードに応じたJSONデータを自動で読み分ける
 async function initQuiz() {
     try {
         const mode = getQuizMode();
@@ -312,12 +308,6 @@ function startTimer() {
         document.getElementById("timer-text").innerText = Math.ceil(timeLeft) + "s";
         if (timeLeft <= 0) {
             clearInterval(timerId);
-            const optionsArea = document.getElementById("options");
-            const buttons = optionsArea.getElementsByTagName("button");
-            for (let btn of buttons) {
-                btn.disabled = true;
-            }
-            document.getElementById("btn-rescue-trigger").disabled = true;
             playSound('incorrect'); 
             finishAnswer(false);
         }
@@ -337,25 +327,21 @@ function checkAnswer(idx, clickedBtn) {
     clickedBtn.classList.add("selected-checking");
     document.getElementById("game-container").classList.add("thinking-slow");
 
-    // ★ループ形式のドラムロール音「ドロドロドロドロ…」を開始！
     playSound('drum_start');
 
-    // ★【1.5秒から5.0秒】の間でランダムなミリ秒を算出する計算式
+    // 1.5秒から5.0秒のランダム焦らし
     const randomDelay = Math.floor(Math.random() * (5000 - 1500 + 1)) + 1500;
 
     const isCorrect = (idx === shuffledQuiz[currentIdx].answer);
     
     if (isCorrect) {
         score++;
-        const prizeIdx = Math.min(currentIdx, PRIZE_LIST.length - 1);
-        currentPrize = PRIZE_LIST[prizeIdx];
+        // ★正解数を元に綺麗に1万円ずつ加算
+        currentPrize = score * PRIZE_PER_ANSWER;
     }
     
-    // 計算されたランダムな秒数後に運命の判定！
     setTimeout(() => {
-        // ★ドラムロール音をピタッと停止
         playSound('drum_stop');
-        
         clickedBtn.classList.remove("selected-checking");
         
         if (isCorrect) {
@@ -456,15 +442,15 @@ function showResult() {
         title.innerText = "賢い選択！ゲームを終了しました";
         prizeRes.innerHTML = `お見事！獲得賞金 <span style="font-size: 32px; color: #ffd700;">${currentPrize.toLocaleString()}</span> 円をゲット！`;
     } else if (lives > 0 && score === TOTAL_QUESTIONS) {
-        title.innerText = "満点！ミリオンセラー達成！";
+        title.innerText = "パーフェクト！全問正解！";
         prizeRes.innerHTML = `完全制覇！最高賞金 <span style="font-size: 32px; color: #ffd700;">${currentPrize.toLocaleString()}</span> 円を獲得！！`;
     } else if (lives > 0) {
-        title.innerText = "合格！よく頑張りました";
+        title.innerText = "ゲームクリア！";
         prizeRes.innerHTML = `最終獲得賞金 <span style="font-size: 32px; color: #ffd700;">${currentPrize.toLocaleString()}</span> 円を獲得！`;
     } else {
-        title.innerText = "残念！やり直しです...";
+        title.innerText = "残念！ゲームオーバー...";
         currentPrize = 0; 
-        prizeRes.innerHTML = `ゲームオーバーにつき、賞金は <span style="font-size: 32px; color: #ff4757;">0</span> 円（没収）です...`;
+        prizeRes.innerHTML = `ライフ消滅につき、賞金は <span style="font-size: 32px; color: #ff4757;">0</span> 円（没収）です...`;
     }
 }
 
