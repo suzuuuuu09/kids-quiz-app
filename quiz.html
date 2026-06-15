@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>小学生クイズ - 手書き完成版</title>
+    <title>小学生向けクイズに挑戦中</title>
     <link rel="stylesheet" href="css/quiz.css">
 </head>
 <body>
@@ -17,17 +17,27 @@
         <div id="timer-container"><div id="timer-bar"></div></div>
 
         <div id="quiz-screen">
+            <div class="mode-chip" id="mode-chip-quiz"></div>
             <div id="question-num"></div>
             <div id="question-text"></div>
             <div class="options" id="options"></div>
-            
-            <div id="rescue-wrapper">
-                <button id="btn-rescue-trigger" onclick="openRescueMenu()">お助け機能</button>
+
+            <div id="rescue-summary" class="info-panel">
+                <span class="info-panel-label">残りのお助け（各1回）</span>
+                <div class="rescue-summary-chips" aria-label="残っているお助け">
+                    <span id="summary-half" class="rescue-summary-chip">1/2</span>
+                    <span id="summary-length" class="rescue-summary-chip">文字数</span>
+                    <span id="summary-pass" class="rescue-summary-chip">パス</span>
+                </div>
             </div>
 
-            <div id="rescue-modal" class="hidden-modal">
+            <div id="rescue-wrapper">
+                <button id="btn-rescue-trigger" onclick="openRescueMenu()">お助けを使う</button>
+            </div>
+
+            <div id="rescue-modal" class="hidden-modal" role="dialog" aria-modal="true" aria-labelledby="rescue-modal-title">
                 <div id="rescue-modal-content">
-                    <h3>どのお助け機能を使う？</h3>
+                    <h3 id="rescue-modal-title">使うお助けを選ぶ</h3>
                     <div id="rescue-options-grid">
                         <button id="btn-half" class="rescue-choice-btn" onclick="useHalfItem()">
                             <strong>1/2</strong><span>選択肢が2つに！</span>
@@ -39,32 +49,43 @@
                             <strong>パス</strong><span>問題をやり直せる</span>
                         </button>
                     </div>
-                    <button id="btn-rescue-close" onclick="closeRescueMenu()">戻る</button>
+                    <button id="btn-rescue-close" onclick="closeRescueMenu()">閉じる</button>
                 </div>
             </div>
         </div>
 
         <div id="explanation-screen" class="hidden">
+            <div class="mode-chip" id="mode-chip-explanation"></div>
             <h2 id="exp-status"></h2>
             <div id="exp-text"></div>
-            
-            <div id="prize-display-area" style="font-size: 20px; color: #ffd700; margin: 15px 0; font-weight: bold; text-align: center; background: rgba(0,0,0,0.3); padding: 8px; border-radius: 8px;">
-                現在の積立賞金: <span id="current-prize" style="font-size: 26px;">0</span> 円
+
+            <div id="prize-display-area" class="prize-card" aria-live="polite">
+                <div class="prize-kicker" id="prize-kicker">積立賞金</div>
+                <div id="prize-delta" class="prize-delta"></div>
+                <div id="prize-loss" class="prize-loss hidden"></div>
+                <div class="prize-amount-row">
+                    <span id="prize-current-value">0</span>
+                    <span class="prize-unit">円</span>
+                </div>
+                <div id="prize-range" class="prize-range"></div>
             </div>
 
-            <div style="display: flex; gap: 12px; justify-content: center; width: 100%;">
-                <button id="btn-drop-out" class="chalk-btn" style="background-color: #e74c3c; min-width: 130px;" onclick="dropOut()">ここでやめる</button>
-                <button class="chalk-btn" style="min-width: 130px;" onclick="nextQuestion()">次の問題へ</button>
+            <div class="explanation-actions">
+                <button id="btn-drop-out" class="chalk-btn danger-btn" onclick="dropOut()">賞金を確定して終了</button>
+                <button class="chalk-btn" onclick="nextQuestion()">次の問題へ</button>
             </div>
         </div>
 
         <div id="result-screen" class="hidden">
             <h2 id="result-title">授業終了</h2>
-            <p id="result-score" style="font-size: 22px; margin-bottom: 5px;"></p>
-            <p id="result-prize" style="font-size: 24px; color: #ffd700; font-weight: bold; margin: 15px 0; line-height: 1.4;"></p>
-            
-            <div style="display: flex; justify-content: center; width: 100%; margin-top: 10px;">
-                <button class="chalk-btn" style="min-width: 160px; background-color: #34495e;" onclick="backToTitle()">タイトルへ戻る</button>
+            <p id="result-note"></p>
+            <div class="result-metrics">
+                <div id="result-score" class="result-metric"></div>
+                <div id="result-prize" class="result-metric"></div>
+            </div>
+
+            <div class="result-actions">
+                <button class="chalk-btn result-back-btn" onclick="backToTitle()">タイトルへ戻る</button>
             </div>
         </div>
 

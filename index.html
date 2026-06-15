@@ -1,95 +1,85 @@
 <!DOCTYPE html>
 <html lang="ja">
+
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>kids-quiz-app - タイトル</title>
-  <link rel="stylesheet" href="css/title.css">
-  <style>
-    /* 復習ボタン用のチョーク風紫ピンクカラー */
-    .review-btn {
-        background: #ec407a !important;
-        color: white !important;
-        box-shadow: 0 4px 0px #b4104b !important;
-        margin-top: 10px;
-    }
-    .review-btn:disabled {
-        background: #7f8c8d !important;
-        box-shadow: none !important;
-        opacity: 0.4;
-        cursor: not-allowed;
-    }
-  </style>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width,initial-scale=1">
+	<title>大人は解ける？小学生向けクイズ</title>
+	<link rel="stylesheet" href="css/title.css">
 </head>
+
 <body>
 
-<div id="blackboard-frame">
-    <div id="game-container">
-        
-        <div id="title-visual-area">
-            <img src="dokidoki.png" id="title-illustration" alt="クイズ部イラスト">
-            <h1 id="title-logo">ドキドキ クイズ部</h1>
-        </div>
+	<div id="blackboard-frame">
+		<div id="game-container">
 
-        <div id="main-menu-view" class="menu-view">
-            <button class="menu-btn random-btn" onclick="selectMode('random')">
-                <span class="btn-main">ランダムに挑戦！</span>
-                <span class="btn-sub">全教科からごちゃまぜに出題</span>
-            </button>
+			<div id="title-visual-area">
+				<img src="dokidoki.png" id="title-illustration" alt="クイズ部イラスト">
+				<div id="title-copy">
+					<p id="title-subtitle">大人は解ける？<br>小学生向けクイズに挑戦！</p>
+				</div>
+			</div>
 
-            <button class="menu-btn go-subjects-btn" onclick="toggleView(true)">
-                <span class="btn-main">教科をえらんで挑戦！</span>
-                <span class="btn-sub">国・数・社・理・英からえらぶ</span>
-            </button>
+			<div id="main-menu-view" class="menu-view">
+				<button class="menu-btn random-btn" onclick="selectMode('random')">
+					<span class="btn-main">ランダムに挑戦！</span>
+					<span class="btn-sub">全教科からランダムに出題</span>
+				</button>
 
-            <button id="btn-review-start" class="menu-btn review-btn" onclick="selectMode('review')" disabled>
-                <span class="btn-main">まちがえた問題を復習する</span>
-                <span id="review-count-text" class="btn-sub">現在、復習する問題はありません</span>
-            </button>
-        </div>
+				<button class="menu-btn go-subjects-btn" onclick="toggleView(true)">
+					<span class="btn-main">教科を選んで挑戦！</span>
+					<span class="btn-sub">国・算・社・理・英から選ぶ</span>
+				</button>
 
-        <div id="subject-select-view" class="menu-view hidden">
-            <nav id="subject-grid">
-                <button class="subject-btn kokugo" onclick="selectMode('kokugo')">国語</button>
-                <button class="subject-btn sansu" onclick="selectMode('math')">算数</button>
-                <button class="subject-btn shakai" onclick="selectMode('shakai')">社会</button>
-                <button class="subject-btn rika" onclick="selectMode('rika')">理科</button>
-                <button class="subject-btn eigo" onclick="selectMode('eigo')">英語</button>
-            </nav>
-            <button class="menu-btn go-subjects-btn" style="margin-top:15px;" onclick="toggleView(false)">もどる</button>
-        </div>
+				<button id="btn-review-start" class="menu-btn review-btn" onclick="selectMode('review')" disabled>
+					<span class="btn-main">間違えた問題を復習する</span>
+					<span id="review-count-text" class="btn-sub">現在、復習できる問題はありません</span>
+				</button>
+			</div>
 
-    </div>
-</div>
+			<div id="subject-select-view" class="menu-view hidden">
+				<nav id="subject-grid">
+					<button class="subject-btn kokugo" onclick="selectMode('kokugo')">国語</button>
+					<button class="subject-btn sansu" onclick="selectMode('math')">算数</button>
+					<button class="subject-btn shakai" onclick="selectMode('shakai')">社会</button>
+					<button class="subject-btn rika" onclick="selectMode('rika')">理科</button>
+					<button class="subject-btn eigo" onclick="selectMode('eigo')">英語</button>
+				</nav>
+				<button class="menu-btn go-subjects-btn" style="margin-top:15px;" onclick="toggleView(false)">戻る</button>
+			</div>
 
-<script src="js/app.js"></script>
-<script>
-    // 起動時にローカルストレージを絶対安全にチェックする処理
-    window.addEventListener('DOMContentLoaded', () => {
-        try {
-            const btn = document.getElementById('btn-review-start');
-            const subText = document.getElementById('review-count-text');
-            
-            if (!btn || !subText) return; // 要素が見つからない場合は安全に終了
+		</div>
+	</div>
 
-            const stored = localStorage.getItem('review_questions');
-            
-            if (stored) {
-                const questions = JSON.parse(stored);
-                if (Array.isArray(questions) && questions.length > 0) {
-                    btn.disabled = false;
-                    subText.innerText = `前回のミスやパスなど 【 ${questions.length} 問 】 を復習！`;
-                    return;
-                }
-            }
-            
-            // データがない、または壊れている場合は無効化のまま
-            btn.disabled = true;
-            subText.innerText = "現在、復習する問題はありません";
-        } catch (error) {
-            console.error("復習データの確認中にエラーが発生しました:", error);
-        }
-    });
-</script>
+	<script src="js/app.js"></script>
+	<script>
+		// 起動時にローカルストレージを絶対安全にチェックする処理
+		window.addEventListener('DOMContentLoaded', () => {
+			try {
+				const btn = document.getElementById('btn-review-start');
+				const subText = document.getElementById('review-count-text');
+
+				if (!btn || !subText) return; // 要素が見つからない場合は安全に終了
+
+				const stored = localStorage.getItem('review_questions');
+
+				if (stored) {
+					const questions = JSON.parse(stored);
+					if (Array.isArray(questions) && questions.length > 0) {
+						btn.disabled = false;
+						subText.innerText = `前回の間違い・パス問題【${questions.length}問】を復習`;
+						return;
+					}
+				}
+
+				// データがない、または壊れている場合は無効化のまま
+				btn.disabled = true;
+				subText.innerText = "現在、復習できる問題はありません";
+			} catch (error) {
+				console.error("復習データの確認中にエラーが発生しました:", error);
+			}
+		});
+	</script>
 </body>
+
 </html>
