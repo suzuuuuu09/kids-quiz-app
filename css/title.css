@@ -1,58 +1,136 @@
+:root {
+    color-scheme: dark;
+    --bg-ink: #13251f;
+    --board: #1b4f3c;
+    --board-deep: #12382b;
+    --wood: #6a4637;
+    --wood-deep: #4b2f26;
+    --paper: #f6ead6;
+    --paper-soft: #e5d7bf;
+    --gold: #f4cf5d;
+    --gold-deep: #c79414;
+    --rose: #ea5b8f;
+    --muted: rgba(246, 234, 214, 0.78);
+    --focus: #ffffff;
+}
+
+* {
+    box-sizing: border-box;
+}
+
 body {
-    background-color: #3e2723;
+    min-height: 100dvh;
+    margin: 0;
     display: flex;
     justify-content: center;
     align-items: center;
-    height: 100vh;
-    margin: 0;
-    font-family: "Hiragino Maru Gothic ProN", "Meiryo", sans-serif;
+    padding: 24px 14px;
+    background:
+        radial-gradient(circle at top, rgba(255, 232, 170, 0.08), transparent 36%),
+        linear-gradient(180deg, #2f1c17 0%, #1a1815 100%);
+    color: var(--paper);
+    font-family: "Hiragino Sans", "Yu Gothic", "Meiryo", sans-serif;
+    overflow-x: hidden;
+}
+
+body::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    background:
+        radial-gradient(circle at 20% 20%, rgba(255, 255, 255, 0.045), transparent 22%),
+        radial-gradient(circle at 80% 15%, rgba(255, 255, 255, 0.03), transparent 24%),
+        radial-gradient(circle at 50% 85%, rgba(255, 255, 255, 0.025), transparent 28%);
+    opacity: 0.9;
 }
 
 #blackboard-frame {
-    background-color: #5d4037;
-    padding: 15px;
-    border-radius: 10px;
-    width: 90%;
-    max-width: 450px;
+    width: min(92vw, 460px);
+    background: linear-gradient(180deg, var(--wood) 0%, var(--wood-deep) 100%);
+    padding: 16px;
+    border-radius: 24px;
+    box-shadow: 0 28px 60px rgba(0, 0, 0, 0.34);
+    border: 1px solid rgba(255, 255, 255, 0.08);
 }
 
 #game-container {
-    background-color: #1b4d3e;
-    border: 2px solid #2e7d32;
-    border-radius: 5px;
-    padding: 20px;
     position: relative;
-    min-height: 560px;
-    color: #fdf5e6;
+    overflow: hidden;
+    min-height: min(84vh, 640px);
+    background:
+        radial-gradient(circle at top, rgba(255, 255, 255, 0.05), transparent 42%),
+        linear-gradient(180deg, var(--board) 0%, var(--board-deep) 100%);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 18px;
+    padding: 22px 20px 18px;
+    color: var(--paper);
     text-align: center;
     display: flex;
     flex-direction: column;
     justify-content: space-between;
-    box-sizing: border-box;
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.06),
+        inset 0 -12px 24px rgba(0, 0, 0, 0.18);
+}
+
+#game-container::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background:
+        radial-gradient(circle at 10% 12%, rgba(255, 255, 255, 0.04), transparent 12%),
+        radial-gradient(circle at 88% 18%, rgba(255, 255, 255, 0.03), transparent 14%),
+        radial-gradient(circle at 45% 75%, rgba(255, 255, 255, 0.03), transparent 16%);
+    opacity: 0.9;
 }
 
 #title-visual-area {
+    position: relative;
+    z-index: 1;
     display: flex;
     flex-direction: column;
     align-items: center;
-    width: 100%;
-    flex-grow: 1;
-    justify-content: center;
-    margin-bottom: 15px;
+    gap: 14px;
+    margin-bottom: 14px;
 }
 
 #title-illustration {
-    width: 85%;
+    width: min(86%, 300px);
     max-height: 240px;
     object-fit: contain;
-    margin-bottom: 10px;
+    filter: drop-shadow(0 10px 12px rgba(0, 0, 0, 0.16));
+}
+
+#title-copy {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    text-align: center;
 }
 
 #title-logo {
-    font-size: 28px;
-    color: #ffd700;
-    text-shadow: 2px 2px 0px #000;
     margin: 0;
+    color: var(--paper);
+    font-family: "Yu Mincho", "Hiragino Mincho ProN", "Times New Roman", serif;
+    font-size: clamp(30px, 7vw, 42px);
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-shadow:
+        0 2px 0 rgba(0, 0, 0, 0.35),
+        0 0 18px rgba(0, 0, 0, 0.18);
+}
+
+#title-subtitle {
+    margin: 0;
+    max-width: 20ch;
+    color: #fff2c2;
+    font-size: clamp(18px, 4.2vw, 22px);
+    line-height: 1.45;
+    font-weight: 700;
+    text-wrap: balance;
 }
 
 .menu-view {
@@ -65,52 +143,164 @@ body {
     align-items: center;
     justify-content: center;
     width: 100%;
-    padding: 14px;
+    min-height: 58px;
+    padding: 14px 16px;
     margin-bottom: 12px;
-    border-radius: 8px;
-    font-weight: bold;
+    border-radius: 16px;
+    font-weight: 700;
     cursor: pointer;
     border: none;
+    transition:
+        transform 0.18s ease,
+        box-shadow 0.18s ease,
+        filter 0.18s ease,
+        opacity 0.18s ease;
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+}
+
+.menu-btn:active:not(:disabled) {
+    transform: translateY(2px);
+}
+
+.menu-btn:focus-visible,
+.subject-btn:focus-visible {
+    outline: 3px solid var(--focus);
+    outline-offset: 3px;
+}
+
+.menu-btn .btn-main {
+    font-size: 18px;
+    line-height: 1.3;
+}
+
+.menu-btn .btn-sub {
+    font-size: 12px;
+    line-height: 1.3;
+    opacity: 0.86;
 }
 
 .random-btn {
-    background: #ffd700;
-    color: #1b4d3e;
-    box-shadow: 0 4px 0px #b59600;
+    background: linear-gradient(180deg, #ffe06a 0%, #f0c63d 100%);
+    color: #193f32;
+    box-shadow: 0 6px 0 #b88e1a;
+}
+
+.random-btn:hover {
+    filter: brightness(1.02);
 }
 
 .go-subjects-btn {
-    background: transparent;
-    color: #fdf5e6;
-    border: 2px solid #fdf5e6;
-    box-shadow: 0 4px 0px rgba(253, 245, 230, 0.3);
+    background: rgba(255, 255, 255, 0.03);
+    color: var(--paper);
+    border: 2px solid rgba(255, 255, 255, 0.82);
+    box-shadow: 0 6px 0 rgba(255, 255, 255, 0.16);
 }
 
-.menu-btn .btn-main { font-size: 18px; }
-.menu-btn .btn-sub { font-size: 11px; opacity: 0.8; margin-top: 3px; }
+.review-btn {
+    margin-top: 10px;
+    background: linear-gradient(180deg, #ff6e9d 0%, #d93c73 100%);
+    color: #fff;
+    box-shadow: 0 6px 0 #a42b55;
+}
+
+.review-btn:disabled {
+    background: #6c7177;
+    box-shadow: none;
+    opacity: 0.46;
+    cursor: not-allowed;
+}
+
+#subject-select-view {
+    position: relative;
+    z-index: 1;
+}
 
 #subject-grid {
     display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 10px;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
 }
-.subject-btn.eigo { grid-column: span 2; }
 
 .subject-btn {
-    background: transparent;
-    color: #fdf5e6;
-    border: 2px solid #fdf5e6;
-    padding: 12px;
+    min-height: 56px;
+    background: rgba(255, 255, 255, 0.03);
+    color: var(--paper);
+    border: 2px solid rgba(255, 255, 255, 0.86);
+    padding: 12px 10px;
     font-size: 16px;
-    font-weight: bold;
-    border-radius: 8px;
+    font-weight: 700;
+    border-radius: 16px;
     cursor: pointer;
+    transition:
+        transform 0.18s ease,
+        box-shadow 0.18s ease,
+        opacity 0.18s ease;
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
 }
 
-.subject-btn.kokugo { border-color: #ff8a80; color: #ff8a80; }
-.subject-btn.sansu  { border-color: #80d8ff; color: #80d8ff; }
-.subject-btn.shakai { border-color: #ffd180; color: #ffd180; }
-.subject-btn.rika   { border-color: #b9f6ca; color: #b9f6ca; }
-.subject-btn.eigo   { border-color: #ea80fc; color: #ea80fc; }
+.subject-btn:active:not(:disabled) {
+    transform: translateY(2px);
+}
 
-.hidden { display: none !important; }
+.subject-btn.kokugo {
+    border-color: #ffb3b3;
+    color: #ffd5d5;
+}
+
+.subject-btn.sansu {
+    border-color: #a8e8ff;
+    color: #d8f6ff;
+}
+
+.subject-btn.shakai {
+    border-color: #ffd69b;
+    color: #ffe7bf;
+}
+
+.subject-btn.rika {
+    border-color: #b7f5d5;
+    color: #defce9;
+}
+
+.subject-btn.eigo {
+    grid-column: span 2;
+    border-color: #d1dbff;
+    color: #e5ebff;
+}
+
+.hidden {
+    display: none !important;
+}
+
+@media (max-width: 380px) {
+    #blackboard-frame {
+        width: 94vw;
+        padding: 12px;
+        border-radius: 20px;
+    }
+
+    #game-container {
+        padding: 18px 14px 16px;
+        min-height: min(84vh, 600px);
+    }
+
+    .menu-btn .btn-main {
+        font-size: 16px;
+    }
+
+    .menu-btn .btn-sub {
+        font-size: 11px;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        animation: none !important;
+        transition: none !important;
+        scroll-behavior: auto !important;
+    }
+}
