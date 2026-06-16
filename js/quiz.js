@@ -18,6 +18,7 @@ let hasUsedLength = false;
 let hasUsedPass = false;
 let skipAdvanceAfterPass = false;
 let correctQuestionSet = new Set();
+let attemptedQuestionSet = new Set();
 
 let prizeAnimationId = null;
 let lastFocusedElement = null;
@@ -327,11 +328,13 @@ function renderMetric(element, label, value, unit, caption) {
 }
 
 function getAttemptedQuestionCount() {
-    return Math.min(currentIdx + 1, shuffledQuiz.length);
+    return attemptedQuestionSet.size;
 }
 
 function getRemainingQuestionsForCurrentRun() {
-    return shuffledQuiz.filter((question) => !correctQuestionSet.has(question.question));
+    return shuffledQuiz.filter(
+        (question) => attemptedQuestionSet.has(question.question) && !correctQuestionSet.has(question.question)
+    );
 }
 
 function getRemainingQuestionsForReview() {
@@ -363,6 +366,7 @@ async function initQuiz() {
         hasUsedPass = false;
         skipAdvanceAfterPass = false;
         correctQuestionSet = new Set();
+        attemptedQuestionSet = new Set();
 
         if (mode === "review") {
             const stored = localStorage.getItem("review_questions");
@@ -562,11 +566,12 @@ function usePassItem() {
     disableQuestionControls();
 
     const passedQuestion = shuffledQuiz.splice(currentIdx, 1)[0];
+    attemptedQuestionSet.add(passedQuestion.question);
     shuffledQuiz.push(passedQuestion);
     skipAdvanceAfterPass = true;
 
     updateRescueSummary();
-    showExplanation("pass");
+    showExplanation("pass", passedQuestion);
 }
 
 function startTimer() {
@@ -627,6 +632,11 @@ function checkAnswer(idx, clickedBtn) {
 }
 
 function finishAnswer(isCorrect) {
+    const data = shuffledQuiz[currentIdx];
+    if (data) {
+        attemptedQuestionSet.add(data.question);
+    }
+
     closeRescueMenu(false);
 
     if (!isCorrect) {
@@ -642,7 +652,7 @@ function finishAnswer(isCorrect) {
     }, 900);
 }
 
-function showExplanation(statusType) {
+function showExplanation(statusType, questionData = shuffledQuiz[currentIdx]) {
     $("draw-circle").classList.add("fade-out");
     $("draw-cross").classList.add("fade-out");
 
@@ -653,7 +663,7 @@ function showExplanation(statusType) {
 
     updateModeChips();
 
-    const data = shuffledQuiz[currentIdx];
+    const data = questionData;
     const status = $("exp-status");
 
     if (statusType === "pass") {
