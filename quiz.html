@@ -1,106 +1,112 @@
 <!DOCTYPE html>
 <html lang="ja">
+
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>小学生向けクイズに挑戦中</title>
-    <link rel="stylesheet" href="css/quiz.css">
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>小学生向けクイズに挑戦中</title>
+	<link rel="stylesheet" href="css/quiz.css">
 </head>
+
 <body>
 
-<div id="blackboard-frame">
-    <div id="game-container">
-        <div id="status-bar">
-            <div id="lives">❤️❤️❤️</div>
-            <div id="timer-text">10s</div>
-        </div>
-        <div id="timer-container"><div id="timer-bar"></div></div>
+	<div id="blackboard-frame">
+		<div id="game-container">
+			<div id="status-bar">
+				<div id="lives">❤️❤️❤️</div>
+				<div id="timer-text">10s</div>
+			</div>
+			<div id="timer-container">
+				<div id="timer-bar"></div>
+			</div>
 
-        <div id="quiz-screen">
-            <div class="mode-chip" id="mode-chip-quiz"></div>
-            <div id="question-num"></div>
-            <div id="question-text"></div>
-            <div class="options" id="options"></div>
+			<div id="quiz-screen">
+				<div class="mode-chip" id="mode-chip-quiz"></div>
+				<div id="question-num"></div>
+				<div id="question-text"></div>
+				<div class="options" id="options"></div>
 
-            <div id="rescue-summary" class="info-panel">
-                <span class="info-panel-label">残りのお助け（各1回）</span>
-                <div class="rescue-summary-chips" aria-label="残っているお助け">
-                    <span id="summary-half" class="rescue-summary-chip">1/2</span>
-                    <span id="summary-length" class="rescue-summary-chip">文字数</span>
-                    <span id="summary-pass" class="rescue-summary-chip">パス</span>
-                </div>
-            </div>
+				<div id="rescue-summary" class="info-panel">
+					<span class="info-panel-label">残りのお助け（各1回）</span>
+					<div class="rescue-summary-chips" aria-label="残っているお助け">
+						<span id="summary-half" class="rescue-summary-chip">1/2</span>
+						<span id="summary-length" class="rescue-summary-chip">文字数</span>
+						<span id="summary-pass" class="rescue-summary-chip">パス</span>
+					</div>
+				</div>
 
-            <div id="rescue-wrapper">
-                <button id="btn-rescue-trigger" onclick="openRescueMenu()">お助けを使う</button>
-            </div>
+				<div id="rescue-wrapper">
+					<button id="btn-rescue-trigger" onclick="openRescueMenu()">お助けを使う</button>
+				</div>
 
-            <div id="rescue-modal" class="hidden-modal" role="dialog" aria-modal="true" aria-labelledby="rescue-modal-title">
-                <div id="rescue-modal-content">
-                    <h3 id="rescue-modal-title">使うお助けを選ぶ</h3>
-                    <div id="rescue-options-grid">
-                        <button id="btn-half" class="rescue-choice-btn" onclick="useHalfItem()">
-                            <strong>1/2</strong><span>選択肢が2つに！</span>
-                        </button>
-                        <button id="btn-length" class="rescue-choice-btn" onclick="useLengthItem()">
-                            <strong>文字数</strong><span>正解の文字数がわかる</span>
-                        </button>
-                        <button id="btn-pass" class="rescue-choice-btn" onclick="usePassItem()">
-                            <strong>パス</strong><span>問題をやり直せる</span>
-                        </button>
-                    </div>
-                    <button id="btn-rescue-close" onclick="closeRescueMenu()">閉じる</button>
-                </div>
-            </div>
-        </div>
+				<div id="rescue-modal" class="hidden-modal" role="dialog" aria-modal="true"
+					aria-labelledby="rescue-modal-title">
+					<div id="rescue-modal-content">
+						<h3 id="rescue-modal-title">使うお助けを選ぶ</h3>
+						<div id="rescue-options-grid">
+							<button id="btn-half" class="rescue-choice-btn" onclick="useHalfItem()">
+								<strong>1/2</strong><span>選択肢が2つに！</span>
+							</button>
+							<button id="btn-length" class="rescue-choice-btn" onclick="useLengthItem()">
+								<strong>文字数</strong><span>正解の文字数がわかる</span>
+							</button>
+							<button id="btn-pass" class="rescue-choice-btn" onclick="usePassItem()">
+								<strong>パス</strong><span>問題をスキップできる</span>
+							</button>
+						</div>
+						<button id="btn-rescue-close" onclick="closeRescueMenu()">閉じる</button>
+					</div>
+				</div>
+			</div>
 
-        <div id="explanation-screen" class="hidden">
-            <div class="mode-chip" id="mode-chip-explanation"></div>
-            <h2 id="exp-status"></h2>
-            <div id="exp-text"></div>
+			<div id="explanation-screen" class="hidden">
+				<div class="mode-chip" id="mode-chip-explanation"></div>
+				<h2 id="exp-status"></h2>
+				<div id="exp-text"></div>
 
-            <div id="prize-display-area" class="prize-card" aria-live="polite">
-                <div class="prize-kicker" id="prize-kicker">積立賞金</div>
-                <div id="prize-delta" class="prize-delta"></div>
-                <div id="prize-loss" class="prize-loss hidden"></div>
-                <div class="prize-amount-row">
-                    <span id="prize-current-value">0</span>
-                    <span class="prize-unit">円</span>
-                </div>
-                <div id="prize-range" class="prize-range"></div>
-            </div>
+				<div id="prize-display-area" class="prize-card" aria-live="polite">
+					<div class="prize-kicker" id="prize-kicker">積立賞金</div>
+					<div id="prize-delta" class="prize-delta"></div>
+					<div id="prize-loss" class="prize-loss hidden"></div>
+					<div class="prize-amount-row">
+						<span id="prize-current-value">0</span>
+						<span class="prize-unit">円</span>
+					</div>
+					<div id="prize-range" class="prize-range"></div>
+				</div>
 
-            <div class="explanation-actions">
-                <button id="btn-drop-out" class="chalk-btn danger-btn" onclick="dropOut()">賞金を確定して終了</button>
-                <button class="chalk-btn" onclick="nextQuestion()">次の問題へ</button>
-            </div>
-        </div>
+				<div class="explanation-actions">
+					<button id="btn-drop-out" class="chalk-btn danger-btn" onclick="dropOut()">賞金を確定して終了</button>
+					<button class="chalk-btn" onclick="nextQuestion()">次の問題へ</button>
+				</div>
+			</div>
 
-        <div id="result-screen" class="hidden">
-            <h2 id="result-title">授業終了</h2>
-            <p id="result-note"></p>
-            <div class="result-metrics">
-                <div id="result-score" class="result-metric"></div>
-                <div id="result-prize" class="result-metric"></div>
-            </div>
+			<div id="result-screen" class="hidden">
+				<h2 id="result-title">授業終了</h2>
+				<p id="result-note"></p>
+				<div class="result-metrics">
+					<div id="result-score" class="result-metric"></div>
+					<div id="result-prize" class="result-metric"></div>
+				</div>
 
-            <div class="result-actions">
-                <button class="chalk-btn result-back-btn" onclick="backToTitle()">タイトルへ戻る</button>
-            </div>
-        </div>
+				<div class="result-actions">
+					<button class="chalk-btn result-back-btn" onclick="backToTitle()">タイトルへ戻る</button>
+				</div>
+			</div>
 
-        <div id="feedback-overlay">
-            <svg id="svg-feedback" viewBox="0 0 200 200">
-                <circle id="draw-circle" cx="100" cy="100" r="70" />
-                <g id="draw-cross">
-                    <line x1="50" y1="50" x2="150" y2="150" />
-                    <line x1="150" y1="50" x2="50" y2="150" />
-                </g>
-            </svg>
-        </div>
-    </div>
-</div>
+			<div id="feedback-overlay">
+				<svg id="svg-feedback" viewBox="0 0 200 200">
+					<circle id="draw-circle" cx="100" cy="100" r="70" />
+					<g id="draw-cross">
+						<line x1="50" y1="50" x2="150" y2="150" />
+						<line x1="150" y1="50" x2="50" y2="150" />
+					</g>
+				</svg>
+			</div>
+		</div>
+	</div>
 
-<script src="js/quiz.js"></script>
+	<script src="js/quiz.js"></script>
 </body>
+
 </html>
